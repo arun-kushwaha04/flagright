@@ -8,9 +8,721 @@ datasource db {
   url      = env("DB_CONNECTION_URL")
 }
 
+enum UserType {
+  ADMIN
+  NORMAL
+}
 
 model User {
-  id    String  @id
-  email String  @unique
-  name  String?
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  firstName String
+  lastName  String
+  password  String
+  userType  UserType @default(ADMIN)
+  currency  Currency
+  country   Country
+
+  transactionsOrigin      Transaction[] @relation("origin")
+  transactionsDestination Transaction[] @relation("destination")
+}
+
+model Transaction {
+  id                        Int      @id @default(autoincrement())
+  originId                  Int
+  origin                    User     @relation("origin", fields: [originId], references: [id])
+  destinationId             Int
+  destination               User     @relation("destination", fields: [destinationId], references: [id])
+  originAmount              Float
+  originAmountCurrency      Currency
+  destinationAmount         Float
+  destinationAmountCurrency Currency
+  description               String
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@index([originId])
+  @@index([destinationId])
+  @@index([createdAt])
+}
+
+enum Country {
+  AF // Afghanistan
+  AL // Albania
+  DZ // Algeria
+  AS // American Samoa
+  AD // Andorra
+  AO // Angola
+  AI // Anguilla
+  AQ // Antarctica
+  AG // Antigua and Barbuda
+  AR // Argentina
+  AM // Armenia
+  AW // Aruba
+  AU // Australia
+  AT // Austria
+  AZ // Azerbaijan
+  BS // Bahamas
+  BH // Bahrain
+  BD // Bangladesh
+  BB // Barbados
+  BY // Belarus
+  BE // Belgium
+  BZ // Belize
+  BJ // Benin
+  BM // Bermuda
+  BT // Bhutan
+  BO // Bolivia
+  BA // Bosnia and Herzegovina
+  BW // Botswana
+  BV // Bouvet Island
+  BR // Brazil
+  IO // British Indian Ocean Territory
+  BN // Brunei
+  BG // Bulgaria
+  BF // Burkina Faso
+  BI // Burundi
+  CV // Cape Verde
+  KH // Cambodia
+  CM // Cameroon
+  CA // Canada
+  KY // Cayman Islands
+  CF // Central African Republic
+  TD // Chad
+  CL // Chile
+  CN // China
+  CX // Christmas Island
+  CC // Cocos (Keeling) Islands
+  CO // Colombia
+  KM // Comoros
+  CG // Congo
+  CD // Democratic Republic of the Congo
+  CK // Cook Islands
+  CR // Costa Rica
+  HR // Croatia
+  CU // Cuba
+  CW // Curaçao
+  CY // Cyprus
+  CZ // Czech Republic
+  DK // Denmark
+  DJ // Djibouti
+  DM // Dominica
+  DO // Dominican Republic
+  EC // Ecuador
+  EG // Egypt
+  SV // El Salvador
+  GQ // Equatorial Guinea
+  ER // Eritrea
+  EE // Estonia
+  SZ // Eswatini
+  ET // Ethiopia
+  FK // Falkland Islands
+  FO // Faroe Islands
+  FJ // Fiji
+  FI // Finland
+  FR // France
+  PF // French Polynesia
+  GA // Gabon
+  GM // Gambia
+  GE // Georgia
+  DE // Germany
+  GH // Ghana
+  GI // Gibraltar
+  GR // Greece
+  GL // Greenland
+  GD // Grenada
+  GP // Guadeloupe
+  GU // Guam
+  GT // Guatemala
+  GG // Guernsey
+  GN // Guinea
+  GW // Guinea-Bissau
+  GY // Guyana
+  HT // Haiti
+  HM // Heard Island and McDonald Islands
+  VA // Holy See
+  HN // Honduras
+  HK // Hong Kong
+  HU // Hungary
+  IS // Iceland
+  IN // India
+  ID // Indonesia
+  IR // Iran
+  IQ // Iraq
+  IE // Ireland
+  IM // Isle of Man
+  IL // Israel
+  IT // Italy
+  JM // Jamaica
+  JP // Japan
+  JE // Jersey
+  JO // Jordan
+  KZ // Kazakhstan
+  KE // Kenya
+  KI // Kiribati
+  KP // North Korea
+  KR // South Korea
+  KW // Kuwait
+  KG // Kyrgyzstan
+  LA // Laos
+  LV // Latvia
+  LB // Lebanon
+  LS // Lesotho
+  LR // Liberia
+  LY // Libya
+  LI // Liechtenstein
+  LT // Lithuania
+  LU // Luxembourg
+  MO // Macau
+  MG // Madagascar
+  MW // Malawi
+  MY // Malaysia
+  MV // Maldives
+  ML // Mali
+  MT // Malta
+  MH // Marshall Islands
+  MQ // Martinique
+  MR // Mauritania
+  MU // Mauritius
+  YT // Mayotte
+  MX // Mexico
+  FM // Micronesia
+  MD // Moldova
+  MC // Monaco
+  MN // Mongolia
+  ME // Montenegro
+  MS // Montserrat
+  MA // Morocco
+  MZ // Mozambique
+  MM // Myanmar
+  NA // Namibia
+  NR // Nauru
+  NP // Nepal
+  NL // Netherlands
+  NC // New Caledonia
+  NZ // New Zealand
+  NI // Nicaragua
+  NE // Niger
+  NG // Nigeria
+  NU // Niue
+  NF // Norfolk Island
+  MP // Northern Mariana Islands
+  NO // Norway
+  OM // Oman
+  PK // Pakistan
+  PW // Palau
+  PS // Palestine
+  PA // Panama
+  PG // Papua New Guinea
+  PY // Paraguay
+  PE // Peru
+  PH // Philippines
+  PN // Pitcairn Islands
+  PL // Poland
+  PT // Portugal
+  PR // Puerto Rico
+  QA // Qatar
+  RE // Réunion
+  RO // Romania
+  RU // Russia
+  RW // Rwanda
+  BL // Saint Barthélemy
+  SH // Saint Helena
+  KN // Saint Kitts and Nevis
+  LC // Saint Lucia
+  MF // Saint Martin
+  SX // Sint Maarten
+  SD // Sudan
+  SR // Suriname
+  SJ // Svalbard and Jan Mayen
+  SE // Sweden
+  CH // Switzerland
+  SY // Syria
+  TW // Taiwan
+  TZ // Tanzania
+  TH // Thailand
+  TG // Togo
+  TK // Tokelau
+  TO // Tonga
+  TT // Trinidad and Tobago
+  TN // Tunisia
+  TR // Turkey
+  TM // Turkmenistan
+  TC // Turks and Caicos Islands
+  TV // Tuvalu
+  UG // Uganda
+  UA // Ukraine
+  AE // United Arab Emirates
+  GB // United Kingdom
+  US // United States
+  UY // Uruguay
+  UZ // Uzbekistan
+  VU // Vanuatu
+  VE // Venezuela
+  VN // Vietnam
+  WF // Wallis and Futuna
+  EH // Western Sahara
+  YE // Yemen
+  ZM // Zambia
+  ZW // Zimbabwe
+}
+
+enum Currency {
+  INCH // 1inch Network
+  AAVE // Aave
+  ABT // ArcBlock
+  ACH // Alchemy Pay
+  ACS // Access Protocol
+  ADA // Cardano
+  AED // United Arab Emirates Dirham
+  AERGO // Aergo
+  AERO // AERON
+  AFN // Afghan Afghani
+  AGLD // Agld
+  AIOZ // Aioz Network
+  ALCX // Alchemix
+  ALEPH // Aleph.im
+  ALGO // Algorand
+  ALICE // My Neighbor Alice
+  ALL // All
+  AMD // Armenian Dram
+  AMP // Amp
+  ANG // Netherlands Antillean Guilder
+  ANKR // Ankr
+  ANT // Aragon
+  AOA // Angolan Kwanza
+  APE // ApeCoin
+  API3 // API3
+  APT // Aptos
+  ARB // Arbitrum
+  ARPA // ARPA Chain
+  ARS // Argentine Peso
+  ASM // Asm
+  AST // Asch
+  ATA // Atatica
+  ATOM // Cosmos
+  AUCTION // Auction
+  AUD // Australian Dollar
+  AUDIO // Audius
+  AURORA // Aurora
+  AVAX // Avalanche
+  AVT // Aventus
+  AWG // Aruban Florin
+  AXL // Axelar
+  AXS // Axie Infinity
+  AZN // Azerbaijani Manat
+  BADGER // Badger DAO
+  BAL // Balancer
+  BAM // Bosnia and Herzegovina Convertible Mark
+  BAND // Band Protocol
+  BAT // Basic Attention Token
+  BBD // Barbados Dollar
+  BCH // Bitcoin Cash
+  BDT // Bangladeshi Taka
+  BGN // Bulgarian Lev
+  BHD // Bahraini Dinar
+  BICO // Biconomy
+  BIF // Burundian Franc
+  BIGTIME // Big Time
+  BIT // BitDAO
+  BLUR // Blur
+  BLZ // Bluzelle
+  BMD // Bermudian Dollar
+  BND // Brunei Dollar
+  BNT // 0x
+  BOB // Bolivian Boliviano
+  BOBA // Boba Network
+  BOND // Bondly
+  BONK // Bonk
+  BRL // Brazilian Real
+  BSD // Bahamian Dollar
+  BSV // Bitcoin SV
+  BTC // Bitcoin
+  BTN // Bhutanese Ngultrum
+  BTRST // Braintrust
+  BUSD // Binance USD
+  BWP // Botswana Pula
+  BYN // Belarusian Ruble
+  BYR // Belarusian Ruble (old)
+  BZD // Belize Dollar
+  C98 // Coin98
+  CAD // Canadian Dollar
+  CBETH // Coinbase Wrapped Staked ETH
+  CDF // Congolese Franc
+  CELR // Celer Network
+  CGLD // Celo Dollar
+  CHF // Swiss Franc
+  CHZ // Chiliz
+  CLF // Chilean Unit of Account (UF)
+  CLP // Chilean Peso
+  CLV // Clover Finance
+  CNH // Chinese Yuan (offshore)
+  CNY // Chinese Yuan
+  COMP // Compound
+  COP // Colombian Peso
+  COTI // Coti
+  COVAL // Covalent
+  CRC // Costa Rican Colón
+  CRO // Crypto.com Coin
+  CRPT // Crypterium
+  CRV // Curve DAO Token
+  CTSI // Cartesi
+  CTX // Cortex
+  CUC // Cuban Convertible Peso
+  CUP // Cuban Peso
+  CVC // Civic
+  CVE // Cape Verdean Escudo
+  CVX // Convex Finance
+  CZK // Czech Koruna
+  DAI // DAI
+  DAR // Darma
+  DASH // Dash
+  DDX // DDEX
+  DESO // DeSo
+  DEXT // DEXTools
+  DIA // DIA
+  DIMO // Dimo
+  DJF // Djiboutian Franc
+  DKK // Danish Krone
+  DNT // district0x
+  DOGE // Dogecoin
+  DOP // Dominican Peso
+  DOT // Polkadot
+  DREP // Drep
+  DYP // DeFi Yield Protocol
+  DZD // Algerian Dinar
+  EEK // Estonian Kroon
+  EGLD // Elrond
+  EGP // Egyptian Pound
+  ELA // Elastos
+  ENJ // Enjin Coin
+  ENS // Ethereum Name Service
+  EOS // EOS
+  ERN // Eritrean Nakfa
+  ETB // Ethiopian Birr
+  ETC // Ethereum Classic
+  ETH // Ethereum
+  ETH2 // Ethereum 2.0
+  EUR // Euro
+  EUROC // Euro Coin
+  FARM // Harvest Finance
+  FET // Fetch.ai
+  FIDA // Bonfida
+  FIL // Filecoin
+  FIS // Stafi
+  FJD // Fijian Dollar
+  FKP // Falkland Islands Pound
+  FLOW // Flow
+  FLR // Flare
+  FORT // Fort
+  FORTH // Ampleforth
+  FOX // ShapeShift
+  FX // Flexa
+  GAL // Galxe
+  GALA // Gala Games
+  GBP // British Pound Sterling
+  GEL // Georgian Lari
+  GFI // Goldfinch
+  GGP // Guernsey Pound
+  GHS // Ghanaian Cedi
+  GHST // Aavegotchi
+  GIP // Gibraltar Pound
+  GLM // Golem
+  GMD // Gambian Dalasi
+  GMT // STEPN
+  GNF // Guinean Franc
+  GNO // Gnosis
+  GNT // Golem
+  GODS // Gods Unchained
+  GRT // The Graph
+  GST // Green Satoshi Token
+  GTC // Gitcoin
+  GTQ // Guatemalan Quetzal
+  GUSD // Gemini Dollar
+  GYD // Guyanese Dollar
+  GYEN // Great British Pound (Yen)
+  HBAR // Hedera Hashgraph
+  HFT // Hegic
+  HIGH // Highstreet
+  HKD // Hong Kong Dollar
+  HNL // Honduran Lempira
+  HNT // Helium
+  HONEY // HONEY
+  HOPR // Hopr
+  HRK // Croatian Kuna
+  HTG // Haitian Gourde
+  HUF // Hungarian Forint
+  ICP // Internet Computer
+  IDEX // IDEX
+  IDR // Indonesian Rupiah
+  ILS // Israeli New Shekel
+  ILV // Illuvium
+  IMP // Isle of Man Pound
+  IMX // Immutable X
+  INDEX // Index
+  INJ // Injective Protocol
+  INR // Indian Rupee
+  INV // Invictus
+  IOTX // IoTeX
+  IQD // Iraqi Dinar
+  IRR // Iranian Rial
+  ISK // Icelandic Króna
+  JASMY // Jasmy
+  JEP // Jersey Pound
+  JMD // Jamaican Dollar
+  JOD // Jordanian Dinar
+  JPY // Japanese Yen
+  JTO // Jeto
+  JUP // Jupiter
+  KAVA // Kava
+  KEEP // Keep Network
+  KES // Kenyan Shilling
+  KGS // Kyrgyzstani Som
+  KHR // Cambodian Riel
+  KMF // Comorian Franc
+  KNC // Kyber Network
+  KPW // North Korean Won
+  KRL // Kleros
+  KRW // South Korean Won
+  KSM // Kusama
+  KWD // Kuwaiti Dinar
+  KYD // Cayman Islands Dollar
+  KZT // Kazakhstani Tenge
+  LAK // Laotian Kip
+  LBP // Lebanese Pound
+  LCX // LCX
+  LDO // Lido DAO
+  LINK // Chainlink
+  LIT // Litentry
+  LKR // Sri Lankan Rupee
+  LOKA // Loka
+  LOOM // Loom Network
+  LPT // Livepeer
+  LQTY // Liquity
+  LRC // Loopring
+  LRD // Liberian Dollar
+  LSETH // Lido Staked Ether
+  LSL // Lesotho Loti
+  LTC // Litecoin
+  LTL // Lithuanian Litas
+  LVL // Latvian Lats
+  LYD // Libyan Dinar
+  MAD // Moroccan Dirham
+  MAGIC // Magic
+  MANA // Decentraland
+  MASK // Mask Network
+  MATH // MATH
+  MATIC // Polygon
+  MCO2 // Moss Carbon Credit
+  MDL // Moldovan Leu
+  MDT // Media
+  MEDIA // Media
+  METIS // Metis
+  MGA // Malagasy Ariary
+  MINA // Mina Protocol
+  MIR // Mirror Protocol
+  MKD // Macedonian Denar
+  MKR // Maker
+  MLN // Enzyme
+  MMK // Myanmar Kyat
+  MNDE // MinD
+  MNT // Mongolian Tögrög
+  MOBILE // Mobile
+  MONA // MonaCoin
+  MOP // Macanese Pataca
+  MPL // Maple
+  MRO // Mauritanian Ouguiya
+  MRU // Mauritian Rupee
+  MSOL // Marin
+  MTL // Metal
+  MULTI // MultiChain
+  MUR // Mauritian Rupee
+  MUSE // Muse
+  MVR // Maldivian Rufiyaa
+  MWK // Malawian Kwacha
+  MXC // MXC
+  MXN // Mexican Peso
+  MYR // Malaysian Ringgit
+  MZN // Mozambican Metical
+  NAD // Namibian Dollar
+  NCT // Nucleus Vision
+  NEAR // NEAR Protocol
+  NEST // Nestle
+  NGN // Nigerian Naira
+  NIO // Nicaraguan Córdoba
+  NKN // NKN
+  NMR // Numeraire
+  NOK // Norwegian Krone
+  NPR // Nepalese Rupee
+  NU // NuCypher
+  NZD // New Zealand Dollar
+  OCEAN // Ocean Protocol
+  OGN // Origin Protocol
+  OMG // OMG Network
+  OMR // Omani Rial
+  ONDO // Ondo
+  OOKI // Ooki
+  OP // Optimism
+  ORCA // Orca
+  ORN // Orion Protocol
+  OSMO // Osmosis
+  OXT // Orchid
+  PAB // Panamanian Balboa
+  PAX // Paxos Standard
+  PEN // Peruvian Sol
+  PERP // Perpetual Protocol
+  PGK // Papua New Guinean Kina
+  PHP // Philippine Peso
+  PKR // Pakistani Rupee
+  PLA // PlayDapp
+  PLN // Polish Zloty
+  PLU // Pluton
+  PNG // Papua New Guinea Kina
+  POLS // Polkastarter
+  POLY // Polymath
+  POND // Marlin
+  POWR // Power Ledger
+  PRIME // Prime
+  PRO // Pro
+  PRQ // PARSIQ
+  PUNDIX // Pundi X
+  PYG // Paraguayan Guarani
+  PYR // Vulcan Forged
+  PYUSD // PayPal USD
+  QAR // Qatari Rial
+  QI // Qi
+  QNT // Quant
+  QSP // Quantstamp
+  QUICK // QuickSwap
+  RAD // Radicle
+  RAI // RAI
+  RARE // Rare
+  RARI // Rarible
+  RBN // Ribbon Finance
+  REN // Ren
+  RENDER // Render Token
+  REP // Augur
+  REPV2 // Augur (v2)
+  REQ // Request
+  RGT // Rari Governance Token
+  RLC // iExec RLC
+  RLY // Rally
+  RNDR // Render Token
+  RON // Romanian Leu
+  ROSE // Oasis Network
+  RPL // Rocket Pool
+  RSD // Serbian Dinar
+  RUB // Russian Ruble
+  RWF // Rwandan Franc
+  SAND // The Sandbox
+  SAR // Saudi Riyal
+  SBD // Steem Dollar
+  SCR // Seychellois Rupee
+  SDG // Sudanese Pound
+  SEAM // Seam
+  SEI // Sei
+  SEK // Swedish Krona
+  SGD // Singapore Dollar
+  SHIB // Shiba Inu
+  SHP // Saint Helena Pound
+  SHPING // Shping
+  SKK // Slovak Koruna
+  SKL // SKALE
+  SLL // Sierra Leonean Leone
+  SNT // Status
+  SNX // Synthetix
+  SOL // Solana
+  SOS // Somali Shilling
+  SPA // Spa
+  SPELL // Spell Token
+  SRD // Surinamese Dollar
+  SSP // South Sudanese Pound
+  STD // São Tomé and Príncipe Dobra
+  STG // Stargate Finance
+  STORJ // Storj
+  STRK // Staked Strudel
+  STX // Stacks
+  SUI // Sui
+  SUKU // Suku
+  SUPER // SuperFarm
+  SUSHI // SushiSwap
+  SVC // Salvadoran Colón
+  SWFTC // SwftCoin
+  SYLO // Sylo
+  SYN // Synapse
+  SYP // Syrian Pound
+  SZL // Swazi Lilangeni
+  T // Tether
+  THB // Thai Baht
+  TIA // Tia
+  TIME // Wonderland
+  TJS // Tajikistani Somoni
+  TMM // TMM
+  TMT // Turkmenistani Manat
+  TND // Tunisian Dinar
+  TONE // Toncoin
+  TOP // Tongan Paʻanga
+  TRAC // OriginTrail
+  TRB // Tellor
+  TRIBE // Tribe
+  TRU // TrueFi
+  TRY // Turkish Lira
+  TTD // Trinidad and Tobago Dollar
+  TVK // Terra Virtua Kolect
+  TWD // New Taiwan Dollar
+  TZS // Tanzanian Shilling
+  UAH // Ukrainian Hryvnia
+  UGX // Ugandan Shilling
+  UMA // UMA
+  UNFI // Unifi Protocol DAO
+  UNI // Uniswap
+  UPI // UPI
+  USD // United States Dollar
+  USDC // USD Coin
+  USDT // Tether
+  UST // TerraUSD
+  UYU // Uruguayan Peso
+  UZS // Uzbekistani Som
+  VARA // Vara
+  VEF // Venezuelan Bolívar
+  VELO // Velodrome
+  VES // Venezuelan Bolívar Soberano
+  VET // VeChain
+  VGX // Voyager Token
+  VND // Vietnamese Dong
+  VOXEL // Voxies
+  VTHO // VeChainThor
+  VUV // Vanuatu Vatu
+  WAMPL // WAMPL
+  WAXL // WAX
+  WBTC // Wrapped Bitcoin
+  WCFG // Wrapped Centrifuge
+  WLUNA // Wrapped LUNA
+  WST // Samoan Tala
+  XAF // Central African CFA Franc
+  XAG // Silver Ounce
+  XAU // Gold Ounce
+  XCD // East Caribbean Dollar
+  XCN // CryptoNote
+  XDR // Special Drawing Rights
+  XLM // Stellar
+  XMON // XMON
+  XOF // West African CFA Franc
+  XPD // Palladium Ounce
+  XPF // CFP Franc
+  XPT // Platinum Ounce
+  XRP // XRP
+  XTZ // Tezos
+  XYO // XYO Network
+  YER // Yemeni Rial
+  YFI // Yearn.Finance
+  YFII // Yearn Finance II
+  ZAR // South African Rand
+  ZEC // Zcash
+  ZEN // Horizen
+  ZETA // Zeta
+  ZMK // Zambian Kwacha (old)
+  ZMW // Zambian Kwacha
+  ZRX // 0x
+  ZWD // Zimbabwean Dollar
 }
