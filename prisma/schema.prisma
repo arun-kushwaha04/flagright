@@ -17,6 +17,13 @@ enum UserType {
   NORMAL
 }
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWL
+  TRANSFER
+  SELFTRANSFER
+}
+
 model User {
   id            Int      @id @default(autoincrement())
   email         String   @unique
@@ -67,6 +74,7 @@ model Transaction {
   destinationAmountCurrency Currency
   destinationBankId         Int
   description               String
+  type TransactionType
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 

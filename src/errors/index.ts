@@ -170,27 +170,6 @@ export class DataFetchError extends CustomHttpException {
   }
 }
 
-export class JobPostAlreadyExists extends HttpException {
-  constructor() {
-    super('Job Post already exists', HttpStatus.BAD_REQUEST);
-  }
-}
-
-export class InvalidPost extends HttpException {
-  constructor() {
-    super('Invalid post', HttpStatus.BAD_REQUEST);
-  }
-}
-
-export class InvalidJSONFromLLM implements Error {
-  name: 'Invalid JSON response';
-  message: 'Invalid JSON object returned from LLM';
-}
-
-export class InvalidResumeFormat implements Error {
-  name: 'Invalid resume format';
-  message: 'Unable to read resume';
-}
 export class PlanAlreadyBought extends HttpException {
   constructor() {
     super('User already has a plan', HttpStatus.BAD_REQUEST);
@@ -200,5 +179,17 @@ export class PlanAlreadyBought extends HttpException {
 export class BankNotFound extends HttpException {
   constructor() {
     super('Bank not found', HttpStatus.NOT_FOUND);
+  }
+}
+
+export class BankUserAlreadyExists extends HttpException {
+  constructor() {
+    super('User already member of the bank', HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class BankUserNotExists extends HttpException {
+  constructor() {
+    super('User not a member of the bank', HttpStatus.BAD_REQUEST);
   }
 }

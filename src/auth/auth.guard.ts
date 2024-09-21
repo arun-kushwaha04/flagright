@@ -1,10 +1,10 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { RootConfigService } from 'src/config/root/root.service';
 import { InvalidToken, NoToken } from 'src/errors';
 import { AuthService } from './auth.service';
-// import { IUserGuard } from './dto/guard-user.dto';
+import { IUserGuard } from './dto/guard-user.dto';
+import { CustomRequest } from 'src/utils/interface';
 
 const adminRoutes = ['/bank/create'];
 const openRoutes = [
@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const request: CustomRequest = context.switchToHttp().getRequest();
 
     const baseUrl = request.url;
     if (openRoutes.includes(baseUrl)) return true;
@@ -43,10 +43,10 @@ export class AuthGuard implements CanActivate {
       if (!userInfo.exists) throw new InvalidToken();
       if (adminRoutes.includes(baseUrl) && !userInfo.isAdmin)
         throw new InvalidToken();
-      // const user: IUserGuard = {
-      //   userId: userId as number,
-      // };
-      // // request.user = user;
+      const user: IUserGuard = {
+        userId: userId as number,
+      };
+      request.user = user;
       return true;
     } catch (error) {
       console.log('Token verification error', error);
