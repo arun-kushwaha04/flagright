@@ -38,5 +38,4 @@ export class PrismaService extends PrismaClient {
 
   static UserTypes = $Enums.UserType;
   static CurrencyTypes = $Enums.Currency;
-  static CountryTypes = $Enums.Country;
 }

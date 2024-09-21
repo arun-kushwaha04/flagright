@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { ICreateUser } from './dto/create-user.dto';
-import { User } from '@prisma/client';
+import { User, UserType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import {
   BankNotFound,
@@ -37,7 +37,30 @@ export class AuthService {
 
       // inserting the user in the database
       const user = await this.prisma.user.create({
-        data: data,
+        data: {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
+          userType: data.userType,
+          banks: {
+            create: [
+              {
+                bank: {
+                  connect: {
+                    id: bankId,
+                  },
+                },
+                balance: 0,
+              },
+            ],
+          },
+          defaultBank: {
+            connect: {
+              id: bankId,
+            },
+          },
+        },
       });
       return user;
     } catch (error) {
@@ -83,14 +106,23 @@ export class AuthService {
     }
   }
 
-  async userExists(userId: number): Promise<boolean> {
+  async userExists(
+    userId: number,
+  ): Promise<{ isAdmin: boolean; exists: boolean }> {
     // checking if user exists with given userId
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
-    if (user) return true;
-    return false;
+    if (user)
+      return {
+        exists: true,
+        isAdmin: user.userType === UserType.ADMIN,
+      };
+    return {
+      exists: false,
+      isAdmin: false,
+    };
   }
 }

@@ -6,6 +6,14 @@ import { InvalidToken, NoToken } from 'src/errors';
 import { AuthService } from './auth.service';
 // import { IUserGuard } from './dto/guard-user.dto';
 
+const adminRoutes = ['/bank/create'];
+const openRoutes = [
+  '/auth/signUp',
+  '/auth/signIn',
+  '/bank/get',
+  '/bank/getCurrencies',
+];
+
 // guard for protecting routes
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,7 +27,7 @@ export class AuthGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
 
     const baseUrl = request.url;
-    if (baseUrl == '/auth/signUp' || baseUrl == '/auth/signIn') return true;
+    if (openRoutes.includes(baseUrl)) return true;
     const token: string | null = request.cookies['token'];
 
     if (!token) {
@@ -31,8 +39,10 @@ export class AuthGuard implements CanActivate {
         secret: this.rootConfigService.jwtSecret,
       });
 
-      const validUser = await this.authService.userExists(userId as number);
-      if (!validUser) throw new InvalidToken();
+      const userInfo = await this.authService.userExists(userId as number);
+      if (!userInfo.exists) throw new InvalidToken();
+      if (adminRoutes.includes(baseUrl) && !userInfo.isAdmin)
+        throw new InvalidToken();
       // const user: IUserGuard = {
       //   userId: userId as number,
       // };
