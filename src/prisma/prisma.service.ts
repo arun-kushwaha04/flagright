@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { $Enums, PrismaClient } from '@prisma/client';
 import { DBConfigService } from 'src/config/database/db.service';
 import { RootConfigService } from 'src/config/root/root.service';
 
@@ -35,4 +35,8 @@ export class PrismaService extends PrismaClient {
     }
     return [];
   }
+
+  static UserTypes = $Enums.UserType;
+  static CurrencyTypes = $Enums.Currency;
+  static CountryTypes = $Enums.Country;
 }

@@ -8,6 +8,10 @@ datasource db {
   url      = env("DB_CONNECTION_URL")
 }
 
+// generator erd {
+//   provider = "prisma-erd-generator"
+// }
+
 enum UserType {
   ADMIN
   NORMAL
@@ -19,12 +23,39 @@ model User {
   firstName String
   lastName  String
   password  String
-  userType  UserType @default(ADMIN)
-  currency  Currency
-  country   Country
+  userType  UserType @default(NORMAL)
+  defaultBankId Int
 
   transactionsOrigin      Transaction[] @relation("origin")
   transactionsDestination Transaction[] @relation("destination")
+  bank Bank[] @relation("bank")
+  balance                 Balance[]     @relation("user balance")
+  defaultBank Bank @relation("default bank", fields: [defaultBankId], references: [id])
+}
+
+model Bank {
+  id   Int    @id @default(autoincrement())
+  name String
+  currency  Currency
+  country   Country
+  userId Int
+
+  user User @relation("bank", fields: [userId], references: [id])
+  balance Balance[] @relation("bank account")
+  transactionsOrigin Transaction[] @relation("origin bank")
+  transactionsDestination Transaction[] @relation("destination bank")
+  defautUsers User[] @relation("default bank")
+}
+
+model Balance {
+  userId  Int
+  bankId  Int
+  balance Int
+
+  user User @relation("user balance", fields: [userId], references: [id])
+  bank Bank @relation("bank account", fields: [bankId], references: [id])
+
+  @@id([userId, bankId])
 }
 
 model Transaction {
@@ -35,11 +66,16 @@ model Transaction {
   destination               User     @relation("destination", fields: [destinationId], references: [id])
   originAmount              Float
   originAmountCurrency      Currency
+  originBankId  Int
   destinationAmount         Float
   destinationAmountCurrency Currency
+  destinationBankId Int
   description               String
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
+
+  originBank Bank @relation("origin bank", fields: [originBankId], references: [id])
+  destinationBank Bank @relation("destination bank", fields: [destinationBankId], references: [id])
 
   @@index([originId])
   @@index([destinationId])

@@ -196,3 +196,9 @@ export class PlanAlreadyBought extends HttpException {
     super('User already has a plan', HttpStatus.BAD_REQUEST);
   }
 }
+
+export class BankNotFound extends HttpException {
+  constructor() {
+    super('Bank not found', HttpStatus.NOT_FOUND);
+  }
+}
