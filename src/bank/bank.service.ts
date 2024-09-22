@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ICreateBank } from './dto/create-bank.dto';
-import { Bank, Currency } from '@prisma/client';
+import { Bank, Currency, $Enums } from '@prisma/client';
 import {
   BankNotFound,
   BankUserAlreadyExists,
@@ -80,6 +80,40 @@ export class BankService {
     }
   }
 
+  async getDefaultBankId(userId: number): Promise<number> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          defaultBankId: true,
+        },
+      });
+      return user.defaultBankId;
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+
+  async getUserBankInfo(
+    userId: number,
+    bankId?: number,
+  ): Promise<{ balance: number; currency: $Enums.Currency; bankId: number }> {
+    try {
+      if (!bankId) {
+        bankId = await this.getDefaultBankId(userId);
+      }
+      return {
+        balance: await this.getUserBankBalance(userId, bankId),
+        currency: await this.getBankCurrency(bankId),
+        bankId,
+      };
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+
   async addUserBanks(userId: number, bankId: number) {
     try {
       // checking if the bank exists
@@ -127,7 +161,7 @@ export class BankService {
 
   async getUserBankBalance(userId: number, bankId: number): Promise<number> {
     try {
-      // checking if the user bank already exists
+      // checking if the bank exists
       if (!this.existUserBank(userId, bankId)) throw new BankUserNotExists();
       const userBank = await this.prisma.userBank.findUnique({
         where: {
@@ -141,6 +175,20 @@ export class BankService {
         },
       });
       return userBank.balance;
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+
+  async getBankCurrency(bankId: number): Promise<$Enums.Currency> {
+    try {
+      // checking if the user bank already exists
+      if (!this.bankExits(bankId)) throw new BankNotFound();
+      const bank = await this.prisma.bank.findUnique({
+        where: { id: bankId },
+        select: { currency: true },
+      });
+      return bank.currency;
     } catch (error) {
       throw handleError(error);
     }

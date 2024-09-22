@@ -32,7 +32,6 @@ async function main() {
   const bojBank = await prisma.bank.create({
     data: { name: 'Bank Of Japan', currency: 'JPY' },
   });
-
   const bocBank = await prisma.bank.create({
     data: { name: 'Bank Of China', currency: 'CNY' },
   });

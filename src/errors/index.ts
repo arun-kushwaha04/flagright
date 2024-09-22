@@ -193,3 +193,18 @@ export class BankUserNotExists extends HttpException {
     super('User not a member of the bank', HttpStatus.BAD_REQUEST);
   }
 }
+
+export class NotEnoughBalance extends HttpException {
+  constructor() {
+    super('Not enough balance', HttpStatus.BAD_REQUEST);
+  }
+}
+
+export class SameUserSameAccountTransfer extends HttpException {
+  constructor() {
+    super(
+      "Can't transfer between same account of an user",
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+}
