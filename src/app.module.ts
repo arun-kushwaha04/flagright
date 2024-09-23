@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { BankModule } from './bank/bank.module';
 import { TransactionModule } from './transactions/transaction.module';
+import { TransactionQueueModule } from './bullmq/transaction/transaction.module';
+import { DatabaseConfigModule } from './config/database/db.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { TransactionModule } from './transactions/transaction.module';
     BankModule,
     PrismaModule,
     TransactionModule,
+    TransactionQueueModule,
+    DatabaseConfigModule,
     RootConfigModule,
   ],
   controllers: [AppController],

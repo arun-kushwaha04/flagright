@@ -6,7 +6,12 @@ import { AuthService } from './auth.service';
 import { IUserGuard } from './dto/guard-user.dto';
 import { CustomRequest } from 'src/utils/interface';
 
-const adminRoutes = ['/bank/create'];
+const adminRoutes = [
+  '/bank/create',
+  '/transaction/toggleCorn',
+  '/transaction/updateCornCount',
+  '/transaction/cornInfo',
+];
 const openRoutes = [
   '/auth/signUp',
   '/auth/signIn',

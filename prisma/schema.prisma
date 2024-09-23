@@ -58,7 +58,7 @@ model Bank {
 model UserBank {
   userId  Int
   bankId  Int
-  balance Int @default(0) 
+  balance Float @default(0) 
 
   user User @relation(fields: [userId], references: [id])
   bank Bank @relation(fields: [bankId], references: [id])

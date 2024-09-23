@@ -1,9 +1,9 @@
 import { BullModule } from '@nestjs/bullmq';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TRANSACTION_QUEUE } from '../constant';
 import { TransactionQueueConsumer } from './transaction.consumer';
 import { TransactionQueueService } from './transaction.service';
-
+import { TransactionModule } from 'src/transactions/transaction.module';
 @Module({
   imports: [
     BullModule.registerQueue({
@@ -13,6 +13,7 @@ import { TransactionQueueService } from './transaction.service';
         port: 6379,
       },
     }),
+    forwardRef(() => TransactionModule),
   ],
   providers: [TransactionQueueConsumer, TransactionQueueService],
   exports: [TransactionQueueService],

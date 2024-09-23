@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { ZodPipe } from 'src/zod.expection';
 import { IWithdrawl, withdrawlSchema } from './dto/withdrawl.dto';
@@ -77,6 +77,33 @@ export class TransactionController {
         req.user.userId,
         body,
       ),
+      success: true,
+    };
+  }
+
+  @Get('toggleCorn')
+  async toggleCorn() {
+    return {
+      message: 'Toggled corn status',
+      payload: await this.transactionService.toggleCorn(),
+      success: true,
+    };
+  }
+
+  @Get('updateCornCount')
+  async updateCornJobCount(@Query('count') count: number) {
+    return {
+      message: 'Toggled corn status',
+      payload: await this.transactionService.updateCornJobCount(count),
+      success: true,
+    };
+  }
+
+  @Get('cornInfo')
+  async getCornInfo() {
+    return {
+      message: 'Toggled corn status',
+      payload: await this.transactionService.getCornInfo(),
       success: true,
     };
   }

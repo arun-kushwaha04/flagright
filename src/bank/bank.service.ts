@@ -7,7 +7,9 @@ import {
   BankUserNotExists,
   handleError,
 } from 'src/errors';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class BankService {
   constructor(private prisma: PrismaService) {}
 

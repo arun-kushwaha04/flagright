@@ -2,7 +2,6 @@ import { $Enums } from '@prisma/client';
 import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
 import { ITransactionQueue, TRANSACTION_QUEUE } from '../constant';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { TransactionService } from 'src/transactions/transaction.service';
 import { NotEnoughBalance } from 'src/errors';
 import { Job, UnrecoverableError } from 'bullmq';
@@ -10,10 +9,7 @@ import { Job, UnrecoverableError } from 'bullmq';
 @Injectable()
 @Processor(TRANSACTION_QUEUE)
 export class TransactionQueueConsumer extends WorkerHost {
-  constructor(
-    private prisma: PrismaService,
-    private transactionService: TransactionService,
-  ) {
+  constructor(private transactionService: TransactionService) {
     super();
   }
 
@@ -41,9 +37,9 @@ export class TransactionQueueConsumer extends WorkerHost {
     const transaction: ITransactionQueue = job.data;
     try {
       if (transaction.transactionType === $Enums.TransactionType.WITHDRAWL) {
-        this.transactionService.performWidthwral(transaction);
+        await this.transactionService.performWidthwral(transaction);
       } else {
-        this.transactionService.performWidthwral(transaction);
+        await this.transactionService.performTransfer(transaction);
       }
       return { status: 'Completed', message: 'Transactions successfull' };
     } catch (error) {

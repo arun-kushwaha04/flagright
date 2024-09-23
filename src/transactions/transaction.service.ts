@@ -19,11 +19,16 @@ import {
   ITransactionQueryResponse,
 } from './dto/query.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { TransactionScheduler } from './transaction.scheduler';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 
+@Injectable()
 export class TransactionService {
   constructor(
     private prisma: PrismaService,
     private bank: BankService,
+    @Inject(forwardRef(() => TransactionScheduler))
+    private transactionScheduler: TransactionScheduler,
     private readonly authService: AuthService,
     private readonly transactionQueueService: TransactionQueueService,
   ) {}
@@ -66,15 +71,27 @@ export class TransactionService {
       //creating a new transaction
       const transaction = await this.prisma.transaction.create({
         data: {
-          originId: userId,
-          destinationId: userId,
           originAmount: data.amount,
           originAmountCurrency: originUserBankInfo.currency,
           destinationAmount: data.amount,
           destinationAmountCurrency: originUserBankInfo.currency,
-          originBankId: originUserBankInfo.bankId,
           description: data.description,
           type: this.getTransferType(userId),
+          origin: {
+            connect: {
+              id: userId,
+            },
+          },
+          destination: {
+            connect: {
+              id: userId,
+            },
+          },
+          originBank: {
+            connect: {
+              id: originUserBankInfo.bankId,
+            },
+          },
         },
       });
 
@@ -151,16 +168,32 @@ export class TransactionService {
       // creating a new transaction
       const transaction = await this.prisma.transaction.create({
         data: {
-          originId: userId,
-          destinationId: data.destinationUserId,
           originAmount: data.amount,
           originAmountCurrency: originUserBankInfo.currency,
           destinationAmount: destinationAmount,
           destinationAmountCurrency: destinationBankInfo.currency,
-          originBankId: originUserBankInfo.bankId,
-          destinationBankId: destinationBankInfo.bankId,
           description: data.description,
           type: this.getTransferType(userId, data.destinationUserId),
+          origin: {
+            connect: {
+              id: userId,
+            },
+          },
+          destination: {
+            connect: {
+              id: data.destinationUserId,
+            },
+          },
+          originBank: {
+            connect: {
+              id: originUserBankInfo.bankId,
+            },
+          },
+          destinationBank: {
+            connect: {
+              id: destinationBankInfo.bankId,
+            },
+          },
         },
       });
 
@@ -380,6 +413,87 @@ export class TransactionService {
       };
     } catch (error) {
       throw handleError(error);
+    }
+  }
+
+  async mockTransaction(count = 0) {
+    try {
+      const users = await this.prisma.user.findMany({
+        select: { id: true },
+      });
+
+      if (users.length < 2) return;
+
+      while (count--) {
+        const transactionType = Math.ceil(Math.random() * 10);
+        if (transactionType > 2) {
+          const user1 = await this.getUserBank(users);
+          const user2 = await this.getUserBank(users);
+          console.log(user1, user2);
+          this.handleTransfer(user1.userId, {
+            originBankId: user1.bankId,
+            destinationUserId: user2.userId,
+            destinationBankId: user2.bankId,
+            amount: Math.random() * 99999 + 1,
+            description: 'Mock transaction',
+          });
+        } else {
+          const user1 = await this.getUserBank(users);
+          this.handleWithdrawl(user1.userId, {
+            originBankId: user1.bankId,
+            amount: Math.random() * 99999 + 1,
+            description: 'Mock transaction',
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  private async getUserBank(users: Array<{ id: number }>): Promise<{
+    userId: number;
+    bankId: number;
+  }> {
+    const idx = Math.ceil(Math.random() * (users.length - 1));
+    const accounts = await this.prisma.userBank.findMany({
+      where: {
+        userId: users[idx].id,
+      },
+      select: {
+        bankId: true,
+      },
+    });
+    const accountIdx = Math.ceil(Math.random() * (accounts.length - 1));
+    return {
+      userId: users[idx].id,
+      bankId: accounts[accountIdx].bankId,
+    };
+  }
+
+  async toggleCorn() {
+    try {
+      // const isAdmin = (await this.authService.userExists(userId)).isAdmin;
+      // if (!isAdmin) throw new NotAuthorized();
+      return this.transactionScheduler.toggle();
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
+  async updateCornJobCount(count: number) {
+    try {
+      return this.transactionScheduler.set(count);
+    } catch (error) {
+      return handleError(error);
+    }
+  }
+
+  async getCornInfo() {
+    try {
+      return this.transactionScheduler.info();
+    } catch (error) {
+      return handleError(error);
     }
   }
 }

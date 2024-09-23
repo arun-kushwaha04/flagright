@@ -5,6 +5,7 @@ const ToUSDMapping = {
   EUR: 0.92,
   JPY: 148.55,
   CNY: 7.3,
+  USD: 1,
 };
 
 const FromUSDMapping = {
@@ -13,6 +14,7 @@ const FromUSDMapping = {
   EUR: 1.08,
   JPY: 0.0067,
   CNY: 0.14,
+  USD: 1,
 };
 
 export const convertToUSD = (
