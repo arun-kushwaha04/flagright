@@ -10,6 +10,7 @@ import {
 import { BankService } from 'src/bank/bank.service';
 import { convertFromUSD, convertToUSD } from 'src/utils/helperfunctions';
 import { IWithdrawl } from './dto/withdrawl.dto';
+import { ITransactionQueue } from 'src/bullmq/constant';
 
 export class TransactionService {
   constructor(
@@ -26,6 +27,20 @@ export class TransactionService {
     return $Enums.TransactionType.TRANSFER;
   }
 
+  async updateTransaction(
+    transactionId: number,
+    status: $Enums.TransactionState,
+  ) {
+    await this.prisma.transaction.update({
+      where: {
+        id: transactionId,
+      },
+      data: {
+        state: status,
+      },
+    });
+  }
+
   async handleWithdrawl(userId: number, data: IWithdrawl) {
     try {
       // checking if both user have account the bank
@@ -36,9 +51,6 @@ export class TransactionService {
         userId,
         data.originBankId,
       );
-      if (originUserBankInfo.balance < data.amount) {
-        throw new NotEnoughBalance();
-      }
 
       // transaction for ensuring atomicity
       await this.prisma.$transaction(async (prisma) => {
@@ -56,17 +68,86 @@ export class TransactionService {
             type: this.getTransferType(userId),
           },
         });
-
-        // Update origin user's bank balance
-        await this.bank.updateUserBankBalance(
-          userId,
-          originUserBankInfo.bankId,
-          -data.amount,
-        );
       });
     } catch (error) {
       throw handleError(error);
     }
+  }
+
+  async performWidthwral(data: ITransactionQueue): Promise<void> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Setting transaction isolation level to seralizable
+      await prisma.$executeRaw`SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`;
+
+      // getting origin user bank info
+      const originUserBankInfo = await this.bank.getUserBankInfo(
+        data.originUserId,
+        data.originBankId,
+      );
+
+      // checking if there is enough balance to execute transaction
+      if (originUserBankInfo.balance < data.amount)
+        throw new NotEnoughBalance();
+
+      // Update origin user's bank balance
+      await this.bank.updateUserBankBalance(
+        data.originUserId,
+        originUserBankInfo.bankId,
+        originUserBankInfo.balance - data.amount,
+      );
+
+      await this.updateTransaction(
+        data.transactionId,
+        $Enums.TransactionState.SUCCESS,
+      );
+    });
+  }
+
+  async performTransfer(data: ITransactionQueue): Promise<void> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Setting transaction isolation level to seralizable
+      await prisma.$executeRaw`SET TRANSACTION ISOLATION LEVEL SERIALIZABLE`;
+
+      // getting origin user bank info
+      const originUserBankInfo = await this.bank.getUserBankInfo(
+        data.originUserId,
+        data.originBankId,
+      );
+
+      // getting desination user bank info
+      const destinationBankInfo = await this.bank.getUserBankInfo(
+        data.destinationUserId,
+        data.destinationBankId,
+      );
+
+      // checking if there is enough balance to execute transaction
+      if (originUserBankInfo.balance < data.amount)
+        throw new NotEnoughBalance();
+
+      // converting the currency
+      const destinationAmount = convertFromUSD(
+        convertToUSD(data.amount, originUserBankInfo.currency),
+        destinationBankInfo.currency,
+      );
+      // Update origin user's bank balance
+      await this.bank.updateUserBankBalance(
+        data.originUserId,
+        originUserBankInfo.bankId,
+        originUserBankInfo.balance - data.amount,
+      );
+
+      // Update destination user's bank balance
+      await this.bank.updateUserBankBalance(
+        data.destinationUserId,
+        destinationBankInfo.bankId,
+        destinationBankInfo.balance + destinationAmount,
+      );
+
+      await this.updateTransaction(
+        data.transactionId,
+        $Enums.TransactionState.SUCCESS,
+      );
+    });
   }
 
   async handleTransfer(userId: number, data: ITransfer): Promise<void> {
@@ -92,9 +173,6 @@ export class TransactionService {
         data.destinationUserId,
         data.destinationBankId,
       );
-      if (originUserBankInfo.balance < data.amount) {
-        throw new NotEnoughBalance();
-      }
       const destinationAmount = convertFromUSD(
         convertToUSD(data.amount, originUserBankInfo.currency),
         destinationBankInfo.currency,
@@ -117,20 +195,6 @@ export class TransactionService {
             type: this.getTransferType(userId, data.destinationUserId),
           },
         });
-
-        // Update origin user's bank balance
-        await this.bank.updateUserBankBalance(
-          userId,
-          originUserBankInfo.bankId,
-          -data.amount,
-        );
-
-        // Update destination user's bank balance
-        await this.bank.updateUserBankBalance(
-          data.destinationUserId,
-          destinationBankInfo.bankId,
-          destinationAmount,
-        );
       });
     } catch (error) {
       throw handleError(error);

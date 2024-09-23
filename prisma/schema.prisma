@@ -12,6 +12,12 @@ datasource db {
 //   provider = "prisma-erd-generator"
 // }
 
+enum TransactionState {
+  PENDING
+  FAILED
+  SUCCESS
+}
+
 enum UserType {
   ADMIN
   NORMAL
@@ -72,6 +78,7 @@ model Transaction {
   destinationBankId         Int?
   description               String
   type TransactionType
+  state TransactionState @default(PENDING)
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
