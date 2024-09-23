@@ -11,11 +11,13 @@ import { BankService } from 'src/bank/bank.service';
 import { convertFromUSD, convertToUSD } from 'src/utils/helperfunctions';
 import { IWithdrawl } from './dto/withdrawl.dto';
 import { ITransactionQueue } from 'src/bullmq/constant';
+import { TransactionQueueService } from 'src/bullmq/transaction/transaction.service';
 
 export class TransactionService {
   constructor(
     private prisma: PrismaService,
     private bank: BankService,
+    private readonly transactionQueueService: TransactionQueueService,
   ) {}
 
   getTransferType(
@@ -47,27 +49,33 @@ export class TransactionService {
       if (!this.bank.existUserBank(userId, data.originBankId))
         throw new BankUserNotExists();
 
+      // getting bank info of origin user
       const originUserBankInfo = await this.bank.getUserBankInfo(
         userId,
         data.originBankId,
       );
 
-      // transaction for ensuring atomicity
-      await this.prisma.$transaction(async (prisma) => {
-        // Create the transaction record
-        await prisma.transaction.create({
-          data: {
-            originId: userId,
-            destinationId: userId,
-            originAmount: data.amount,
-            originAmountCurrency: originUserBankInfo.currency,
-            destinationAmount: data.amount,
-            destinationAmountCurrency: originUserBankInfo.currency,
-            originBankId: originUserBankInfo.bankId,
-            description: data.description,
-            type: this.getTransferType(userId),
-          },
-        });
+      //creating a new transaction
+      const transaction = await this.prisma.transaction.create({
+        data: {
+          originId: userId,
+          destinationId: userId,
+          originAmount: data.amount,
+          originAmountCurrency: originUserBankInfo.currency,
+          destinationAmount: data.amount,
+          destinationAmountCurrency: originUserBankInfo.currency,
+          originBankId: originUserBankInfo.bankId,
+          description: data.description,
+          type: this.getTransferType(userId),
+        },
+      });
+
+      // adding transaction to the queue
+      this.transactionQueueService.addJob({
+        ...data,
+        transactionId: transaction.id,
+        originUserId: userId,
+        transactionType: this.getTransferType(userId),
       });
     } catch (error) {
       throw handleError(error);
@@ -95,12 +103,85 @@ export class TransactionService {
         originUserBankInfo.bankId,
         originUserBankInfo.balance - data.amount,
       );
-
-      await this.updateTransaction(
-        data.transactionId,
-        $Enums.TransactionState.SUCCESS,
-      );
     });
+  }
+
+  async handleTransfer(userId: number, data: ITransfer): Promise<void> {
+    try {
+      // checking if both user have account the bank
+      if (
+        !this.bank.existUserBank(userId, data.originBankId) ||
+        !this.bank.existUserBank(data.destinationUserId, data.destinationBankId)
+      )
+        throw new BankUserNotExists();
+
+      // checking if the destination and origin bank are same with same destination and origin users
+      if (
+        data.destinationUserId === userId &&
+        data.destinationBankId === data.originBankId
+      )
+        throw new SameUserSameAccountTransfer();
+
+      // getting bank info of origin user
+      const originUserBankInfo = await this.bank.getUserBankInfo(
+        userId,
+        data.originBankId,
+      );
+
+      // getting bank info of origin user
+      const destinationBankInfo = await this.bank.getUserBankInfo(
+        data.destinationUserId,
+        data.destinationBankId,
+      );
+
+      // converting amount in same currency
+      const destinationAmount = convertFromUSD(
+        convertToUSD(data.amount, originUserBankInfo.currency),
+        destinationBankInfo.currency,
+      );
+
+      // creating a new transaction
+      const transaction = await this.prisma.transaction.create({
+        data: {
+          originId: userId,
+          destinationId: data.destinationUserId,
+          originAmount: data.amount,
+          originAmountCurrency: originUserBankInfo.currency,
+          destinationAmount: destinationAmount,
+          destinationAmountCurrency: destinationBankInfo.currency,
+          originBankId: originUserBankInfo.bankId,
+          destinationBankId: destinationBankInfo.bankId,
+          description: data.description,
+          type: this.getTransferType(userId, data.destinationUserId),
+        },
+      });
+
+      // adding transaction to the queue
+      this.transactionQueueService.addJob({
+        ...data,
+        transactionId: transaction.id,
+        originUserId: userId,
+        transactionType: this.getTransferType(userId),
+      });
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+  async handleDeafultTransfer(
+    userId: number,
+    data: IDefaultTransfer,
+  ): Promise<void> {
+    try {
+      const destinationBankInfo = await this.bank.getUserBankInfo(
+        data.destinationUserId,
+      );
+      await this.handleTransfer(userId, {
+        ...data,
+        destinationBankId: destinationBankInfo.bankId,
+      });
+    } catch (error) {
+      throw handleError(error);
+    }
   }
 
   async performTransfer(data: ITransactionQueue): Promise<void> {
@@ -142,78 +223,6 @@ export class TransactionService {
         destinationBankInfo.bankId,
         destinationBankInfo.balance + destinationAmount,
       );
-
-      await this.updateTransaction(
-        data.transactionId,
-        $Enums.TransactionState.SUCCESS,
-      );
     });
-  }
-
-  async handleTransfer(userId: number, data: ITransfer): Promise<void> {
-    try {
-      // checking if both user have account the bank
-      if (
-        !this.bank.existUserBank(userId, data.originBankId) ||
-        !this.bank.existUserBank(data.destinationUserId, data.destinationBankId)
-      )
-        throw new BankUserNotExists();
-
-      // checking if the destination and origin bank are same with same destination and origin users
-      if (
-        data.destinationUserId === userId &&
-        data.destinationBankId === data.originBankId
-      )
-        throw new SameUserSameAccountTransfer();
-      const originUserBankInfo = await this.bank.getUserBankInfo(
-        userId,
-        data.originBankId,
-      );
-      const destinationBankInfo = await this.bank.getUserBankInfo(
-        data.destinationUserId,
-        data.destinationBankId,
-      );
-      const destinationAmount = convertFromUSD(
-        convertToUSD(data.amount, originUserBankInfo.currency),
-        destinationBankInfo.currency,
-      );
-
-      // transaction for ensuring atomicity
-      await this.prisma.$transaction(async (prisma) => {
-        // Create the transaction record
-        await prisma.transaction.create({
-          data: {
-            originId: userId,
-            destinationId: data.destinationUserId,
-            originAmount: data.amount,
-            originAmountCurrency: originUserBankInfo.currency,
-            destinationAmount: destinationAmount,
-            destinationAmountCurrency: destinationBankInfo.currency,
-            originBankId: originUserBankInfo.bankId,
-            destinationBankId: destinationBankInfo.bankId,
-            description: data.description,
-            type: this.getTransferType(userId, data.destinationUserId),
-          },
-        });
-      });
-    } catch (error) {
-      throw handleError(error);
-    }
-  }
-  async handleDeafultTransfer(
-    userId: number,
-    data: IDefaultTransfer,
-  ): Promise<void> {
-    try {
-      const destinationBankInfo = await this.bank.getUserBankInfo(
-        data.destinationUserId,
-      );
-      await this.handleTransfer(userId, {
-        ...data,
-        destinationBankId: destinationBankInfo.bankId,
-      });
-    } catch (error) {
-      throw handleError(error);
-    }
   }
 }

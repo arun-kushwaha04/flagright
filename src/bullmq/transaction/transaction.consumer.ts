@@ -4,12 +4,12 @@ import { ITransactionQueue, TRANSACTION_QUEUE } from '../constant';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TransactionService } from 'src/transactions/transaction.service';
-import { Job } from 'bull';
 import { NotEnoughBalance } from 'src/errors';
+import { Job, UnrecoverableError } from 'bullmq';
 
 @Injectable()
 @Processor(TRANSACTION_QUEUE)
-export class TransactionConsumer extends WorkerHost {
+export class TransactionQueueConsumer extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private transactionService: TransactionService,
@@ -52,7 +52,7 @@ export class TransactionConsumer extends WorkerHost {
           transaction.transactionId,
           'failed due to insufficient balance',
         );
-        return job.moveToFailed({ message: error.message }, false);
+        throw new UnrecoverableError('Transaction failed');
       }
       throw error;
     }

@@ -6,6 +6,7 @@ import { RootConfigModule } from './config/root/root.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { BankModule } from './bank/bank.module';
+import { TransactionModule } from './transactions/transaction.module';
 
 @Module({
   imports: [
@@ -18,9 +19,10 @@ import { BankModule } from './bank/bank.module';
         abortEarly: true,
       },
     }),
-    PrismaModule,
     AuthModule,
     BankModule,
+    PrismaModule,
+    TransactionModule,
     RootConfigModule,
   ],
   controllers: [AppController],
