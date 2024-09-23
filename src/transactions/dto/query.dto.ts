@@ -1,4 +1,6 @@
+import { z } from 'zod';
 import { $Enums, Transaction } from '@prisma/client';
+
 export type ITransactionQueryRequest = {
   pageNumber: number;
   itemPerPage: number;
@@ -11,6 +13,59 @@ export type ITransactionQueryResponse = {
   totalPage: number;
   transactions: Array<Transaction>;
 };
+
+const FilterSchema = z.object({
+  allTransactionFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.boolean().optional(),
+  }),
+  originBankIdFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.number().optional(),
+  }),
+  destinationIdFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.number().optional(),
+  }),
+  destinationBankIdFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.number().optional(),
+  }),
+  descriptionFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.string().optional(),
+  }),
+  currencyFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.array(z.nativeEnum($Enums.Currency)).optional(),
+  }),
+  dateFilter: z.object({
+    toFilter: z.boolean(),
+    value: z
+      .object({
+        start: z.number(),
+        end: z.number(),
+      })
+      .optional(),
+  }),
+  statusFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.nativeEnum($Enums.TransactionState).optional(),
+  }),
+  typeFilter: z.object({
+    toFilter: z.boolean(),
+    value: z.nativeEnum($Enums.TransactionType).optional(),
+  }),
+  amountFilter: z.object({
+    toFilter: z.boolean(),
+    value: z
+      .object({
+        start: z.number(),
+        end: z.number(),
+      })
+      .optional(),
+  }),
+});
 
 export type IFilter = {
   allTransactionFilter: {
@@ -60,3 +115,9 @@ export type IFilter = {
     };
   };
 };
+
+export const transactionQuerySchema = z.object({
+  pageNumber: z.number(),
+  itemPerPage: z.number(),
+  filter: FilterSchema,
+});

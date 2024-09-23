@@ -18,15 +18,17 @@ import {
   ITransactionQueryRequest,
   ITransactionQueryResponse,
 } from './dto/query.dto';
+import { AuthService } from 'src/auth/auth.service';
 
 export class TransactionService {
   constructor(
     private prisma: PrismaService,
     private bank: BankService,
+    private readonly authService: AuthService,
     private readonly transactionQueueService: TransactionQueueService,
   ) {}
 
-  getTransferType(
+  private getTransferType(
     userId: number,
     destinationUserId?: number,
   ): $Enums.TransactionType {
@@ -234,11 +236,14 @@ export class TransactionService {
 
   async fetchTransactionById(userId: number, transactionId: number) {
     try {
+      const condition = (await this.authService.userExists(userId)).isAdmin
+        ? { id: transactionId } // Admin can access any transaction
+        : {
+            id: transactionId,
+            OR: [{ originId: userId }, { destinationId: userId }], // Non-admin can access only their transactions
+          };
       const transaction = await this.prisma.transaction.findUnique({
-        where: {
-          id: transactionId,
-          OR: [{ originId: userId }, { destinationId: userId }],
-        },
+        where: condition,
       });
       if (!transaction) throw new NotAuthorized();
       return transaction;
@@ -247,7 +252,7 @@ export class TransactionService {
     }
   }
 
-  buildFilter(userId: number, query: IFilter) {
+  private buildFilter(userId: number, query: IFilter) {
     const filters: any = {};
 
     // Origin ID Filter
