@@ -1,21 +1,62 @@
-import { $Enums } from '@prisma/client';
+import { $Enums, Transaction } from '@prisma/client';
 export type ITransactionQueryRequest = {
   pageNumber: number;
-  originIdFilter: {
+  itemPerPage: number;
+  filter: IFilter;
+};
+
+export type ITransactionQueryResponse = {
+  pageNumber: number;
+  itemPerPage: number;
+  totalPage: number;
+  transactions: Array<Transaction>;
+};
+
+export type IFilter = {
+  allTransactionFilter: {
     toFilter: boolean;
-    filter?: string;
+    value?: boolean;
+  };
+  originBankIdFilter: {
+    toFilter: boolean;
+    value?: number;
   };
   destinationIdFilter: {
     toFilter: boolean;
-    filter?: string;
+    value?: number;
+  };
+  destinationBankIdFilter: {
+    toFilter: boolean;
+    value?: number;
   };
   descriptionFilter: {
     toFilter: boolean;
-    filter?: string;
+    value?: string;
   };
   currencyFilter: {
     toFilter: boolean;
-    filter?: $Enums.Currency;
+    value?: Array<$Enums.Currency>;
   };
-  date;
+  dateFilter: {
+    toFilter: boolean;
+    value?: {
+      start: Date;
+      end: Date;
+    };
+  };
+  statusFilter: {
+    toFilter: boolean;
+    value?: $Enums.TransactionState;
+  };
+  typeFilter: {
+    toFilter: boolean;
+    value?: $Enums.TransactionState;
+  };
+  amountFilter: {
+    toFilter: boolean;
+    value?: {
+      start: number;
+      end: number;
+    };
+  };
 };

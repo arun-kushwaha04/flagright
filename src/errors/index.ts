@@ -134,6 +134,12 @@ export class NoToken extends CustomHttpException {
   }
 }
 
+export class NotAuthorized extends CustomHttpException {
+  constructor() {
+    super('Unauthorized', HttpStatus.UNAUTHORIZED);
+  }
+}
+
 export class InvalidCredentials extends CustomHttpException {
   constructor() {
     super('Invalid Credentials', HttpStatus.BAD_REQUEST);

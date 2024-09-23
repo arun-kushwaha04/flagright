@@ -1,9 +1,10 @@
-import { $Enums } from '@prisma/client';
+import { $Enums, Transaction } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IDefaultTransfer, ITransfer } from './dto/transfer.dto';
 import {
   BankUserNotExists,
   handleError,
+  NotAuthorized,
   NotEnoughBalance,
   SameUserSameAccountTransfer,
 } from 'src/errors';
@@ -12,6 +13,11 @@ import { convertFromUSD, convertToUSD } from 'src/utils/helperfunctions';
 import { IWithdrawl } from './dto/withdrawl.dto';
 import { ITransactionQueue } from 'src/bullmq/constant';
 import { TransactionQueueService } from 'src/bullmq/transaction/transaction.service';
+import {
+  IFilter,
+  ITransactionQueryRequest,
+  ITransactionQueryResponse,
+} from './dto/query.dto';
 
 export class TransactionService {
   constructor(
@@ -224,5 +230,151 @@ export class TransactionService {
         destinationBankInfo.balance + destinationAmount,
       );
     });
+  }
+
+  async fetchTransactionById(userId: number, transactionId: number) {
+    try {
+      const transaction = await this.prisma.transaction.findUnique({
+        where: {
+          id: transactionId,
+          OR: [{ originId: userId }, { destinationId: userId }],
+        },
+      });
+      if (!transaction) throw new NotAuthorized();
+      return transaction;
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+
+  buildFilter(userId: number, query: IFilter) {
+    const filters: any = {};
+
+    // Origin ID Filter
+    if (
+      query.allTransactionFilter.toFilter &&
+      query.allTransactionFilter.value
+    ) {
+      filters.originId = userId;
+    }
+
+    // Origin Bank ID Filter
+    if (query.originBankIdFilter.toFilter && query.originBankIdFilter.value) {
+      filters.originBankId = query.originBankIdFilter.value;
+    }
+
+    // Destination ID Filter
+    if (query.destinationIdFilter.toFilter && query.destinationIdFilter.value) {
+      filters.destinationId = query.destinationIdFilter.value;
+    }
+
+    // Destination Bank ID Filter
+    if (
+      query.destinationBankIdFilter.toFilter &&
+      query.destinationBankIdFilter.value
+    ) {
+      filters.destinationBankId = query.destinationBankIdFilter.value;
+    }
+
+    // Description Filter (Using Prisma's `contains` or raw SQL for regex)
+    if (query.descriptionFilter.toFilter && query.descriptionFilter.value) {
+      filters.description = {
+        contains: query.descriptionFilter.value, // For substring match
+        mode: 'insensitive', // Optional: Case insensitive
+      };
+    }
+
+    // Currency Filter (Array of Currencies)
+    if (query.currencyFilter.toFilter && query.currencyFilter.value) {
+      filters.originAmountCurrency = {
+        in: query.currencyFilter.value, // Matches any currency in the array
+      };
+      filters.destinationAmountCurrency = {
+        in: query.currencyFilter.value, // Matches any currency in the array
+      };
+    }
+
+    // Date Range Filter
+    if (query.dateFilter.toFilter && query.dateFilter.value) {
+      filters.createdAt = {
+        gte: query.dateFilter.value.start, // Greater than or equal to the start date
+        lte: query.dateFilter.value.end, // Less than or equal to the end date
+      };
+    }
+
+    // Status Filter
+    if (query.statusFilter.toFilter && query.statusFilter.value) {
+      filters.status = query.statusFilter.value;
+    }
+
+    // Type Filter
+    if (query.typeFilter.toFilter && query.typeFilter.value) {
+      filters.type = query.typeFilter.value;
+    }
+
+    // Amount Range Filter
+    if (query.amountFilter.toFilter && query.amountFilter.value) {
+      filters.originAmount = {
+        gte: query.amountFilter.value.start, // Greater than or equal to start amount
+        lte: query.amountFilter.value.end, // Less than or equal to end amount
+      };
+    }
+
+    return filters;
+  }
+
+  async fetchTransactions(
+    userId: number,
+    query: ITransactionQueryRequest,
+  ): Promise<ITransactionQueryResponse> {
+    try {
+      const { pageNumber = 0, itemPerPage = 10, filter } = query;
+
+      const transactionFilter = this.buildFilter(userId, filter);
+
+      const totalItem = await this.prisma.transaction.count({
+        where: transactionFilter,
+      });
+
+      const totalPage = Math.ceil(totalItem / itemPerPage);
+      let transactions: Array<Transaction>;
+      if (pageNumber === 0) {
+        transactions = await this.prisma.transaction.findMany({
+          take: itemPerPage,
+          where: transactionFilter,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+      } else {
+        const itemToSkip = (pageNumber - 1) * itemPerPage;
+        const firstResult = await this.prisma.transaction.findMany({
+          take: itemToSkip,
+          where: transactionFilter,
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+        const cursorId = firstResult[firstResult.length - 1].id;
+        transactions = await this.prisma.transaction.findMany({
+          take: itemPerPage,
+          where: transactionFilter,
+          cursor: {
+            id: cursorId,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        });
+      }
+      return {
+        pageNumber,
+        itemPerPage,
+        totalPage,
+        transactions,
+      };
+    } catch (error) {
+      throw handleError(error);
+    }
   }
 }
