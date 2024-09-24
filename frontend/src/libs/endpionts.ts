@@ -5,6 +5,6 @@ export enum requestType {
   'DELETE',
 }
 
-export const backendBaseUrl = 'http://localhost:5000';
-export const loginRoute = '/auth/singIn';
-export const registerRoute = '/auth/singUp';
+export const backendBaseUrl = 'http://localhost:5000/';
+export const loginRoute = '/auth/signIn';
+export const registerRoute = '/auth/signUp';

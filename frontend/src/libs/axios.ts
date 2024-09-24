@@ -1,13 +1,29 @@
-import { requestType } from './endpionts';
+import { requestType, backendBaseUrl } from './endpionts';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
+export function getCookie(name: string) {
+  const nameEQ = name + '=';
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+export function setCookie(name: string, value: string) {
+  document.cookie = name + '=' + (value || '');
+}
+
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: backendBaseUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 type toastInfoType = {
@@ -25,7 +41,7 @@ type toastInfoType = {
   };
 };
 
-export const fetchData = async (
+export const performAPICall = async (
   url: string,
   type: requestType,
   option = {},
@@ -53,7 +69,7 @@ export const fetchData = async (
   }
 
   try {
-    toastInfo.info.show &&
+    if (toastInfo.info.show)
       toast.info(
         toastInfo.info.message ? toastInfo.info.message : 'Intializing request',
       );
@@ -77,6 +93,8 @@ export const fetchData = async (
         toast.success(
           toastInfo.success.message ? toastInfo.success.message : data.message,
         );
+      console.log(response.headers['set-cookie']);
+      setCookie('toast', response.headers.cookie);
     } else {
       throw new Error('Operation falied');
     }
@@ -85,7 +103,7 @@ export const fetchData = async (
   } catch (err) {
     console.log(err);
 
-    toastInfo.error.show &&
+    if (toastInfo.error.show)
       toast.error(
         toastInfo.error.message ? toastInfo.error.message : 'Operation failed',
       );
