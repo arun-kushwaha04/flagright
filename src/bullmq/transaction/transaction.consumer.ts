@@ -16,10 +16,9 @@ export class TransactionQueueConsumer extends WorkerHost {
   @OnWorkerEvent('completed')
   async onComplete(job: Job<ITransactionQueue>) {
     const transaction: ITransactionQueue = job.data;
-    console.log(transaction.transactionId, 'completed');
     await this.transactionService.updateTransaction(
       transaction.transactionId,
-      $Enums.TransactionState.FAILED,
+      $Enums.TransactionState.SUCCESS,
     );
   }
 
@@ -44,10 +43,7 @@ export class TransactionQueueConsumer extends WorkerHost {
       return { status: 'Completed', message: 'Transactions successfull' };
     } catch (error) {
       if (error instanceof NotEnoughBalance) {
-        console.log(
-          transaction.transactionId,
-          'failed due to insufficient balance',
-        );
+        console.log(transaction, 'failed due to insufficient balance');
         throw new UnrecoverableError('Transaction failed');
       }
       throw error;

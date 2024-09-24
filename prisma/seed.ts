@@ -53,7 +53,7 @@ async function main() {
                 id: flagWriteBank.id,
               },
             },
-            balance: 10000, // 10000 usd
+            balance: 1000000, // 10000 usd
           },
           {
             bank: {
@@ -61,7 +61,7 @@ async function main() {
                 id: boiBank.id,
               },
             },
-            balance: 100000, // 100000 inr
+            balance: 10000000, // 100000 inr
           },
           {
             bank: {
@@ -69,7 +69,7 @@ async function main() {
                 id: boaBank.id,
               },
             },
-            balance: 10000, // 100000 usd
+            balance: 1000000, // 100000 usd
           },
           {
             bank: {
@@ -77,7 +77,7 @@ async function main() {
                 id: borBank.id,
               },
             },
-            balance: 100000, // 100000 rub
+            balance: 10000000, // 100000 rub
           },
           {
             bank: {
@@ -85,7 +85,7 @@ async function main() {
                 id: boeBank.id,
               },
             },
-            balance: 10000, // 100000 eur
+            balance: 1000000, // 100000 eur
           },
           {
             bank: {
@@ -93,7 +93,7 @@ async function main() {
                 id: bojBank.id,
               },
             },
-            balance: 100000, // 100000 jpy
+            balance: 10000000, // 100000 jpy
           },
           {
             bank: {
@@ -101,7 +101,7 @@ async function main() {
                 id: bocBank.id,
               },
             },
-            balance: 100000, // 100000 cny
+            balance: 10000000, // 100000 cny
           },
         ],
       },
@@ -128,7 +128,7 @@ async function main() {
                 id: flagWriteBank.id,
               },
             },
-            balance: 10000, // 10000 usd
+            balance: 1000000, // 10000 usd
           },
           {
             bank: {
@@ -136,7 +136,7 @@ async function main() {
                 id: boiBank.id,
               },
             },
-            balance: 100000, // 100000 inr
+            balance: 10000000, // 100000 inr
           },
         ],
       },

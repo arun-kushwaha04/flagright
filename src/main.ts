@@ -14,16 +14,11 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // Catch uncaught exceptions
-  process.on('uncaughtException', (error: Error) => {
-    console.error('Uncaught Exception:', error.message);
-    console.error(error.stack);
-  });
+  process.on('uncaughtException', () => {});
 
   // Catch unhandled promise rejections
-  process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
-    console.error('Unhandled Rejection:', promise);
-    console.error('Reason:', reason);
-  });
+  process.on('unhandledRejection', () => {});
+
   await app.listen(port);
 }
 bootstrap();

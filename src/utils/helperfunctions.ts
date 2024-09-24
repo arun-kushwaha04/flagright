@@ -1,19 +1,19 @@
 import { $Enums } from '@prisma/client';
 const ToUSDMapping = {
-  INR: 83.25,
-  RUB: 96.5,
-  EUR: 0.92,
-  JPY: 148.55,
-  CNY: 7.3,
+  INR: 0.01,
+  RUB: 0.01,
+  EUR: 1.11,
+  JPY: 0.007,
+  CNY: 0.14,
   USD: 1,
 };
 
 const FromUSDMapping = {
-  INR: 0.012,
-  RUB: 0.01,
-  EUR: 1.08,
-  JPY: 0.0067,
-  CNY: 0.14,
+  INR: 83.54,
+  RUB: 92.82,
+  EUR: 0.9,
+  JPY: 143.47,
+  CNY: 7.05,
   USD: 1,
 };
 

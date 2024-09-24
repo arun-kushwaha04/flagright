@@ -10,7 +10,7 @@ export class TransactionScheduler {
   ) {}
 
   private count = 1;
-  private isRunning = true;
+  private isRunning = false;
 
   @Cron('* * * * * *')
   handleCorn() {

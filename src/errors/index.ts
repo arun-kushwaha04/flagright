@@ -2,6 +2,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 export function handleError(error: Error): Error {
+  console.error(error);
   if (error instanceof CustomHttpException) {
     throw error;
   }

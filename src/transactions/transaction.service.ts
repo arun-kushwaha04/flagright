@@ -202,7 +202,7 @@ export class TransactionService {
         ...data,
         transactionId: transaction.id,
         originUserId: userId,
-        transactionType: this.getTransferType(userId),
+        transactionType: this.getTransferType(userId, data.destinationUserId),
       });
     } catch (error) {
       throw handleError(error);
@@ -429,25 +429,24 @@ export class TransactionService {
         if (transactionType > 2) {
           const user1 = await this.getUserBank(users);
           const user2 = await this.getUserBank(users);
-          console.log(user1, user2);
           this.handleTransfer(user1.userId, {
             originBankId: user1.bankId,
             destinationUserId: user2.userId,
             destinationBankId: user2.bankId,
-            amount: Math.random() * 99999 + 1,
+            amount: parseFloat((Math.random() * 5000 + 1).toFixed(2)),
             description: 'Mock transaction',
           });
         } else {
           const user1 = await this.getUserBank(users);
           this.handleWithdrawl(user1.userId, {
             originBankId: user1.bankId,
-            amount: Math.random() * 99999 + 1,
+            amount: parseFloat((Math.random() * 100 + 1).toFixed(2)),
             description: 'Mock transaction',
           });
         }
       }
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   }
 
