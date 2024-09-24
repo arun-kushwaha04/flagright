@@ -171,18 +171,6 @@ export class InvalidUser extends CustomHttpException {
   }
 }
 
-export class DataFetchError extends CustomHttpException {
-  constructor() {
-    super('Unable to your reterive data', HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-}
-
-export class PlanAlreadyBought extends HttpException {
-  constructor() {
-    super('User already has a plan', HttpStatus.BAD_REQUEST);
-  }
-}
-
 export class BankNotFound extends HttpException {
   constructor() {
     super('Bank not found', HttpStatus.NOT_FOUND);
@@ -213,5 +201,11 @@ export class SameUserSameAccountTransfer extends HttpException {
       "Can't transfer between same account of an user",
       HttpStatus.BAD_REQUEST,
     );
+  }
+}
+
+export class InvalidParams extends HttpException {
+  constructor() {
+    super('Invalid parameter provided', HttpStatus.BAD_REQUEST);
   }
 }

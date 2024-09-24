@@ -3,9 +3,15 @@ import { TransactionService } from './transaction.service';
 import { ZodPipe } from 'src/zod.expection';
 import { IWithdrawl, withdrawlSchema } from './dto/withdrawl.dto';
 import { CustomRequest } from 'src/utils/interface';
-import { ITransfer, transferSchema } from './dto/transfer.dto';
+import {
+  deafultTransferSchema,
+  IDefaultTransfer,
+  ITransfer,
+  transferSchema,
+} from './dto/transfer.dto';
 import {
   ITransactionQueryRequest,
+  modifyBody,
   transactionQuerySchema,
 } from './dto/query.dto';
 
@@ -28,7 +34,7 @@ export class TransactionController {
 
   @Post('defaultTransfer')
   async handleDefaultTransfer(
-    @Body(new ZodPipe(transferSchema)) body: ITransfer,
+    @Body(new ZodPipe(deafultTransferSchema)) body: IDefaultTransfer,
     @Req() req: CustomRequest,
   ) {
     await this.transactionService.handleDeafultTransfer(req.user.userId, body);
@@ -51,9 +57,36 @@ export class TransactionController {
     };
   }
 
+  @Get('toggleCorn')
+  async toggleCorn() {
+    return {
+      message: 'Toggled corn status',
+      payload: await this.transactionService.toggleCorn(),
+      success: true,
+    };
+  }
+
+  @Get('updateCornCount')
+  async updateCornJobCount(@Query('count') count: number) {
+    return {
+      message: 'Updated corn count',
+      payload: await this.transactionService.updateCornJobCount(count),
+      success: true,
+    };
+  }
+
+  @Get('cornInfo')
+  async getCornInfo() {
+    return {
+      message: 'Fetched corn info',
+      payload: await this.transactionService.getCornInfo(),
+      success: true,
+    };
+  }
+
   @Get(':id')
   async fetchTransactionById(
-    @Param('id') transactionId: number,
+    @Param('id') transactionId: string,
     @Req() req: CustomRequest,
   ) {
     return {
@@ -68,42 +101,19 @@ export class TransactionController {
 
   @Post()
   async fetchTransactions(
-    @Body(new ZodPipe(transactionQuerySchema)) body: ITransactionQueryRequest,
+    @Body() body: ITransactionQueryRequest,
     @Req() req: CustomRequest,
   ) {
+    // Convert date strings to Date objects
+    const convertedData = modifyBody(body);
+    transactionQuerySchema.parse(convertedData);
+
     return {
       message: 'Feteched transaction information',
       payload: await this.transactionService.fetchTransactions(
         req.user.userId,
         body,
       ),
-      success: true,
-    };
-  }
-
-  @Get('toggleCorn')
-  async toggleCorn() {
-    return {
-      message: 'Toggled corn status',
-      payload: await this.transactionService.toggleCorn(),
-      success: true,
-    };
-  }
-
-  @Get('updateCornCount')
-  async updateCornJobCount(@Query('count') count: number) {
-    return {
-      message: 'Toggled corn status',
-      payload: await this.transactionService.updateCornJobCount(count),
-      success: true,
-    };
-  }
-
-  @Get('cornInfo')
-  async getCornInfo() {
-    return {
-      message: 'Toggled corn status',
-      payload: await this.transactionService.getCornInfo(),
       success: true,
     };
   }

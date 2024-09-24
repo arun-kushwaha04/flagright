@@ -1,6 +1,22 @@
 import { z } from 'zod';
 import { $Enums, Transaction } from '@prisma/client';
 
+export function modifyBody(data: ITransactionQueryRequest) {
+  const modifiedData: ITransactionQueryRequest = {
+    ...data,
+    filter: { ...data.filter, dateFilter: { ...data.filter.dateFilter } },
+  };
+  if (data.filter.dateFilter.value) {
+    modifiedData.filter.dateFilter.value.start = new Date(
+      data.filter.dateFilter.value.start,
+    );
+    modifiedData.filter.dateFilter.value.end = new Date(
+      data.filter.dateFilter.value.end,
+    );
+  }
+  return modifiedData;
+}
+
 export type ITransactionQueryRequest = {
   pageNumber: number;
   itemPerPage: number;
@@ -43,8 +59,8 @@ const FilterSchema = z.object({
     toFilter: z.boolean(),
     value: z
       .object({
-        start: z.number(),
-        end: z.number(),
+        start: z.date(),
+        end: z.date(),
       })
       .optional(),
   }),

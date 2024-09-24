@@ -85,7 +85,6 @@ export class AuthService {
 
     // throwing error if user not found
     if (!user) throw new InvalidCredentials();
-
     // matching the hashed password stored in db with the provided password
     const isMatch = bcrypt.compareSync(password, user.password);
     if (!isMatch) throw new InvalidCredentials();

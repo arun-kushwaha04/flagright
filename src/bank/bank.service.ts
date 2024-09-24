@@ -121,7 +121,8 @@ export class BankService {
       // checking if the bank exists
       if (!this.bankExits(bankId)) throw new BankNotFound();
       // checking if the user bank already exists
-      if (this.existUserBank(userId, bankId)) throw new BankUserAlreadyExists();
+      if (await this.existUserBank(userId, bankId))
+        throw new BankUserAlreadyExists();
       await this.prisma.user.update({
         where: {
           id: userId,

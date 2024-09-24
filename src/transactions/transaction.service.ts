@@ -4,6 +4,7 @@ import { IDefaultTransfer, ITransfer } from './dto/transfer.dto';
 import {
   BankUserNotExists,
   handleError,
+  InvalidParams,
   NotAuthorized,
   NotEnoughBalance,
   SameUserSameAccountTransfer,
@@ -266,13 +267,19 @@ export class TransactionService {
       );
     });
   }
+  private isParsableToInt(value: string): boolean {
+    const parsed = parseInt(value, 10);
+    return !isNaN(parsed) && Number.isInteger(parsed);
+  }
 
-  async fetchTransactionById(userId: number, transactionId: number) {
+  async fetchTransactionById(userId: number, transactionId: string) {
     try {
+      if (!this.isParsableToInt(transactionId)) throw new InvalidParams();
+      const id = parseInt(transactionId);
       const condition = (await this.authService.userExists(userId)).isAdmin
-        ? { id: transactionId } // Admin can access any transaction
+        ? { id: id } // Admin can access any transaction
         : {
-            id: transactionId,
+            id: id,
             OR: [{ originId: userId }, { destinationId: userId }], // Non-admin can access only their transactions
           };
       const transaction = await this.prisma.transaction.findUnique({
