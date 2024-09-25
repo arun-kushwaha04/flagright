@@ -174,7 +174,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"pageNumber\": 0,\r\n    \"itemPerPage\": 10,\r\n    \"filter\": {\r\n        \"allTransactionFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": true\r\n        },\r\n        \"originBankIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 123\r\n        },\r\n        \"destinationIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 456\r\n        },\r\n        \"destinationBankIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 789\r\n        },\r\n        \"descriptionFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"Transaction Description\"\r\n        },\r\n        \"currencyFilter\": {\r\n            \"toFilter\": true,\r\n            \"value\": [\"INR\"]\r\n        },\r\n        \"dateFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": {\r\n                \"start\": \"2023-09-01T00:00:00Z\",\r\n                \"end\": \"2023-09-30T23:59:59Z\"\r\n            }\r\n        },\r\n        \"statusFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"SUCCESS\"\r\n        },\r\n        \"typeFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"TRANSFER\"\r\n        },\r\n        \"amountFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": {\r\n                \"start\": 100,\r\n                \"end\": 150\r\n            }\r\n  }\r\n}\r\n\r\n}",
+							"raw": "{\r\n    \"pageNumber\": 1,\r\n    \"itemPerPage\": 10,\r\n    \"filter\": {\r\n        \"allTransactionFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": true\r\n        },\r\n        \"originBankIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 123\r\n        },\r\n        \"destinationIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 456\r\n        },\r\n        \"destinationBankIdFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": 789\r\n        },\r\n        \"descriptionFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"Transaction Description\"\r\n        },\r\n        \"currencyFilter\": {\r\n            \"toFilter\": true,\r\n            \"value\": [\"INR\"]\r\n        },\r\n        \"dateFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": {\r\n                \"start\": \"2023-09-01T00:00:00Z\",\r\n                \"end\": \"2023-09-30T23:59:59Z\"\r\n            }\r\n        },\r\n        \"statusFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"SUCCESS\"\r\n        },\r\n        \"typeFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": \"TRANSFER\"\r\n        },\r\n        \"amountFilter\": {\r\n            \"toFilter\": false,\r\n            \"value\": {\r\n                \"start\": 100,\r\n                \"end\": 150\r\n            }\r\n  }\r\n}\r\n\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -379,6 +379,36 @@
 					"response": []
 				},
 				{
+					"name": "banks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bankId\": 22\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/bank/getBanks",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bank",
+								"getBanks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "delete",
 					"request": {
 						"method": "POST",
@@ -406,14 +436,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "New Request",
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"response": []
 		}
 	],
 	"event": [

@@ -1,6 +1,5 @@
 import {
   convertToUserReadableDate,
-  getUserId,
   isUserAdmin,
   performAPICall,
 } from '@/libs/axios';
@@ -17,14 +16,8 @@ import {
   Checkbox,
   Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
   FormControlLabel,
   Grid2,
-  InputLabel,
   MenuItem,
   OutlinedInput,
   Paper,
@@ -1017,24 +1010,24 @@ const UserFunctions = () => {
             {cornJobRunning ? 'Stop Corn Job' : 'Start Corn Job'}
           </Button>
         )}
-        <Button variant="contained" color="primary">
+        {/* <Button variant="contained" color="primary">
           Transfer Money
         </Button>
         <Button variant="contained" color="primary">
           Widthraw Money
-        </Button>
+        </Button> */}
       </Box>
     </Box>
   );
 };
 
-type Transfer = {
-  originBankId: number;
-  destinationUserId: number;
-  destinationBankId: number;
-  amount: number;
-  description: string;
-};
+// type Transfer = {
+//   originBankId: number;
+//   destinationUserId: number;
+//   destinationBankId: number;
+//   amount: number;
+//   description: string;
+// };
 
 // const TransferMoneyModal = (props: {
 //   open: boolean;

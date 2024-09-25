@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { TransactionService } from './transaction.service';
 import { ZodPipe } from 'src/zod.expection';
 import { IWithdrawl, withdrawlSchema } from './dto/withdrawl.dto';
@@ -19,6 +28,7 @@ import {
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
+  @HttpCode(202)
   @Post('withdraw')
   async handleWidthraw(
     @Body(new ZodPipe(withdrawlSchema)) body: IWithdrawl,
@@ -32,6 +42,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(202)
   @Post('defaultTransfer')
   async handleDefaultTransfer(
     @Body(new ZodPipe(deafultTransferSchema)) body: IDefaultTransfer,
@@ -44,6 +55,8 @@ export class TransactionController {
       success: true,
     };
   }
+
+  @HttpCode(202)
   @Post('transfer')
   async handleTransfer(
     @Body(new ZodPipe(transferSchema)) body: ITransfer,
@@ -57,6 +70,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(200)
   @Get('toggleCorn')
   async toggleCorn() {
     return {
@@ -66,6 +80,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(200)
   @Get('updateCornCount')
   async updateCornJobCount(@Query('count') count: number) {
     return {
@@ -75,6 +90,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(200)
   @Get('cornInfo')
   async getCornInfo() {
     return {
@@ -84,6 +100,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(200)
   @Get(':id')
   async fetchTransactionById(
     @Param('id') transactionId: string,
@@ -99,6 +116,7 @@ export class TransactionController {
     };
   }
 
+  @HttpCode(200)
   @Post()
   async fetchTransactions(
     @Body() body: ITransactionQueryRequest,

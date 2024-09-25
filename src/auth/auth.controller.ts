@@ -1,4 +1,11 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ZodPipe } from 'src/zod.expection';
 import { createUserSchema, ICreateUser } from './dto/create-user.dto';
@@ -9,6 +16,7 @@ import { Response } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @HttpCode(200)
   @Post('signUp')
   async signUp(@Body(new ZodPipe(createUserSchema)) body: ICreateUser) {
     await this.authService.singUp(body);
@@ -19,6 +27,7 @@ export class AuthController {
     };
   }
 
+  @HttpCode(200)
   @Post('signIn')
   async signIn(
     @Body(new ZodPipe(userCredSchema)) body: IUserCredentials,
