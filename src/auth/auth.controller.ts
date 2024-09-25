@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ZodPipe } from 'src/zod.expection';
 import { createUserSchema, ICreateUser } from './dto/create-user.dto';
@@ -25,9 +25,13 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const token = await this.authService.signIn(body);
-    res.cookie('token', token, { httpOnly: true });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
 
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       message: 'Signed in successfully',
       payload: null,
       success: true,

@@ -2,7 +2,7 @@
 import React, { FormEvent, useState } from 'react';
 
 import { Button, TextField, Typography } from '@mui/material';
-import { performAPICall } from '@/libs/axios';
+import { performAPICall, setAuthStatus } from '@/libs/axios';
 import { loginRoute, requestType } from '@/libs/endpionts';
 
 export default function Auth(props: {
@@ -38,6 +38,7 @@ function Login(props: { udpateAuthStatus: (value: boolean) => void }) {
     console.log(data);
     if (data.success) {
       props.udpateAuthStatus(true);
+      setAuthStatus();
     } else props.udpateAuthStatus(false);
   };
 

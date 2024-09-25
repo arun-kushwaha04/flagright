@@ -1,28 +1,35 @@
 'use client';
 import Auth from '@/components/auth';
 import Dashboard from '@/components/dashboard';
-import { getCookie } from '@/libs/axios';
+import { getAuthStatus } from '@/libs/axios';
 import { useEffect, useState } from 'react';
 import AppReactToastify from './ReactToastifyWrapper';
 
 export default function Home() {
+  const [isLoading, setLoading] = useState(true);
   const [isAuthenticated, setAuthStatus] = useState(false);
   const updateAuthStatus = (value: boolean) => {
     setAuthStatus(value);
   };
   useEffect(() => {
-    const cookie = getCookie('token');
-    console.log(cookie);
+    const cookie = getAuthStatus();
     if (cookie) setAuthStatus(true);
     else setAuthStatus(false);
+    setLoading(false);
   }, []);
   return (
     <>
-      <AppReactToastify />
-      {isAuthenticated ? (
-        <Dashboard />
+      {isLoading ? (
+        <></> //Loading screen
       ) : (
-        <Auth udpateAuthStatus={updateAuthStatus}></Auth>
+        <>
+          <AppReactToastify />
+          {isAuthenticated ? (
+            <Dashboard />
+          ) : (
+            <Auth udpateAuthStatus={updateAuthStatus}></Auth>
+          )}
+        </>
       )}
     </>
   );

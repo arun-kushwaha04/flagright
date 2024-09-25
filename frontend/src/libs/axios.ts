@@ -2,19 +2,13 @@ import { requestType, backendBaseUrl } from './endpionts';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export function getCookie(name: string) {
-  const nameEQ = name + '=';
-  const ca = document.cookie.split(';');
-  for (let i = 0; i < ca.length; i++) {
-    let c = ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
+export function getAuthStatus() {
+  const authStatus = localStorage.getItem('authStatus');
+  return authStatus ? true : false;
 }
 
-export function setCookie(name: string, value: string) {
-  document.cookie = name + '=' + (value || '');
+export function setAuthStatus() {
+  localStorage.setItem('authStatus', 'true');
 }
 
 const axiosInstance = axios.create({
@@ -22,6 +16,7 @@ const axiosInstance = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    Accept: '*/*',
   },
   withCredentials: true,
 });
@@ -93,8 +88,6 @@ export const performAPICall = async (
         toast.success(
           toastInfo.success.message ? toastInfo.success.message : data.message,
         );
-      console.log(response.headers['set-cookie']);
-      setCookie('toast', response.headers.cookie);
     } else {
       throw new Error('Operation falied');
     }
