@@ -7,6 +7,8 @@ export type IRootConfig = {
   nodeEnv: string;
   port: number;
   jwtSecret: string;
+  redisHost: string;
+  redisPort: number;
 };
 
 export default registerAs('root-config', (): IRootConfig => {
@@ -24,6 +26,14 @@ export default registerAs('root-config', (): IRootConfig => {
     jwtSecret: {
       value: process.env.JWT_SECRET,
       joi: Joi.string(),
+    },
+    redisHost: {
+      value: process.env.REDIS_HOST,
+      joi: Joi.string().default('redis'),
+    },
+    redisPort: {
+      value: process.env.REDIS_PORT,
+      joi: Joi.number().default(6379),
     },
   };
 

@@ -1,0 +1,41 @@
+services:
+  flagright-backend:
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    container_name: flagright-backend
+    depends_on:
+      - redis
+    image: flagright-backend:latest
+    ports:
+      - 5000:5000
+    networks:
+      - flagright_network
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - flagright_network
+  flagright-frontend:
+    build:
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+    container_name: flagright-frontend
+    depends_on:
+      - flagright-backend
+    image: flagright-frontend:latest
+    ports:
+      - 3000:3000
+    networks:
+      - flagright_network
+
+networks:
+  flagright_network:
+    driver: bridge
+
+volumes:
+  redis_data:

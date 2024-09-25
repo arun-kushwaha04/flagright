@@ -16,4 +16,12 @@ export class RootConfigService {
   get jwtSecret(): string {
     return this.configService.get<string>('root-config.jwtSecret')!;
   }
+
+  get redisHost(): string {
+    return this.configService.get<string>('root-config.redisHost')!;
+  }
+
+  get redisPort(): number {
+    return this.configService.get<number>('root-config.redisPort')!;
+  }
 }
