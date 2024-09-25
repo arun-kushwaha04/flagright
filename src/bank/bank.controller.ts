@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Req } from '@nestjs/common';
 import { BankService } from './bank.service';
 import { ZodPipe } from 'src/zod.expection';
 import { createBankSchema, ICreateBank } from './dto/create-bank.dto';
@@ -14,6 +14,7 @@ import { CustomRequest } from 'src/utils/interface';
 export class BankController {
   constructor(private readonly bankService: BankService) {}
 
+  @HttpCode(201)
   @Post('create')
   async createBank(@Body(new ZodPipe(createBankSchema)) body: ICreateBank) {
     await this.bankService.createBank(body);
@@ -24,6 +25,7 @@ export class BankController {
     };
   }
 
+  @HttpCode(200)
   @Get('get')
   async getBank() {
     const banks = await this.bankService.getBanks();
@@ -34,6 +36,7 @@ export class BankController {
     };
   }
 
+  @HttpCode(200)
   @Get('getCurrencies')
   async getCurrencies() {
     const currencies = await this.bankService.getCurrencies();
@@ -44,6 +47,7 @@ export class BankController {
     };
   }
 
+  @HttpCode(201)
   @Post('addBank')
   async addUserBank(
     @Body(new ZodPipe(addUserBankSchema)) body: IAddUserBank,
@@ -57,6 +61,7 @@ export class BankController {
     };
   }
 
+  @HttpCode(200)
   @Post('deleteBank')
   async deleteUserBank(
     @Body(new ZodPipe(deleteUserBankSchema)) body: IDeleteUserBank,
@@ -70,6 +75,7 @@ export class BankController {
     };
   }
 
+  @HttpCode(200)
   @Get('getBankBalance')
   async getUserBankBalance(
     @Body(new ZodPipe(addUserBankSchema)) body: IAddUserBank,
@@ -82,6 +88,17 @@ export class BankController {
     return {
       message: 'Fetched user balance',
       payload: balance,
+      success: true,
+    };
+  }
+
+  @HttpCode(200)
+  @Get('getBanks')
+  async getUserBanks(@Req() req: CustomRequest) {
+    const banks = await this.bankService.getUserBanks(req.user.userId);
+    return {
+      message: 'Fetched user balance',
+      payload: banks,
       success: true,
     };
   }

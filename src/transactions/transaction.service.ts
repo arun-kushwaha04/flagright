@@ -392,7 +392,7 @@ export class TransactionService {
           },
         });
       } else {
-        const itemToSkip = (pageNumber - 1) * itemPerPage;
+        const itemToSkip = pageNumber * itemPerPage;
         const firstResult = await this.prisma.transaction.findMany({
           take: itemToSkip,
           where: transactionFilter,

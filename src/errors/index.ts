@@ -125,7 +125,13 @@ export class PrismaClientRustPanicError extends CustomHttpException {
 
 export class InvalidToken extends CustomHttpException {
   constructor() {
-    super('Invalid token', HttpStatus.BAD_REQUEST);
+    super('Invalid token', HttpStatus.UNAUTHORIZED);
+  }
+}
+
+export class TokenExpired extends CustomHttpException {
+  constructor() {
+    super('Token expired', HttpStatus.UNAUTHORIZED);
   }
 }
 

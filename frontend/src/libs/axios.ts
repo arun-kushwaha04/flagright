@@ -1,5 +1,5 @@
 import { requestType, backendBaseUrl } from './endpionts';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { toast } from 'react-toastify';
 
 export function getAuthStatus() {
@@ -9,6 +9,9 @@ export function getAuthStatus() {
 
 export function setAuthStatus() {
   localStorage.setItem('authStatus', 'true');
+}
+export function unsetAuthStatus() {
+  localStorage.removeItem('authStatus');
 }
 
 const axiosInstance = axios.create({
@@ -95,6 +98,16 @@ export const performAPICall = async (
     return data;
   } catch (err) {
     console.log(err);
+    if (axios.isAxiosError(err)) {
+      const axiosError = err as AxiosError;
+      if (axiosError.response) {
+        if (axiosError.response.status === 401) {
+          // handling token expired
+          unsetAuthStatus();
+          window.location.reload();
+        }
+      }
+    }
 
     if (toastInfo.error.show)
       toast.error(

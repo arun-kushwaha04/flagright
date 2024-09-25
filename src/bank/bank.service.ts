@@ -183,6 +183,28 @@ export class BankService {
     }
   }
 
+  async getUserBanks(userId: number): Promise<
+    {
+      balance: number;
+      bank: { id: number; currency: $Enums.Currency; name: string };
+    }[]
+  > {
+    try {
+      const userBanks = await this.prisma.userBank.findMany({
+        where: {
+          userId: userId,
+        },
+        select: {
+          bank: true,
+          balance: true,
+        },
+      });
+      return userBanks;
+    } catch (error) {
+      throw handleError(error);
+    }
+  }
+
   async getBankCurrency(bankId: number): Promise<$Enums.Currency> {
     try {
       // checking if the user bank already exists
