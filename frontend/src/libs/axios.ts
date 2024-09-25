@@ -6,12 +6,45 @@ export function getAuthStatus() {
   const authStatus = localStorage.getItem('authStatus');
   return authStatus ? true : false;
 }
+export function isUserAdmin() {
+  const authStatus = localStorage.getItem('isAdmin');
+  return authStatus ? true : false;
+}
+export function getUserId() {
+  const userId = localStorage.getItem('userId');
+  return userId ? parseInt(userId) : null;
+}
 
-export function setAuthStatus() {
+export function setAuthStatus(userId: number, isAdmin: boolean) {
   localStorage.setItem('authStatus', 'true');
+  localStorage.setItem('userId', userId.toString());
+  if (isAdmin) localStorage.setItem('isAdmin', 'true');
+  else localStorage.removeItem('isAdmin');
 }
 export function unsetAuthStatus() {
   localStorage.removeItem('authStatus');
+  localStorage.removeItem('isAdmin');
+  localStorage.removeItem('userId');
+}
+
+export function convertToUserReadableDate(dateString: string): string {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid date';
+  }
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  };
+  const formattedDate = date.toLocaleDateString('en-US', options);
+
+  return `${formattedDate}`;
 }
 
 const axiosInstance = axios.create({

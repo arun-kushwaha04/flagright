@@ -35,6 +35,22 @@ export class BankService {
     }
   }
 
+  async getUsers(): Promise<
+    {
+      id: number;
+      firstName: string;
+      lastName: string;
+    }[]
+  > {
+    try {
+      const users = await this.prisma.user.findMany();
+      return users;
+    } catch (error) {
+      console.log('Error while getting users', error);
+      throw handleError(error);
+    }
+  }
+
   async getCurrencies(): Promise<string[]> {
     try {
       const currencies: string[] = [];

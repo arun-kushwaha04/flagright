@@ -29,9 +29,10 @@ export class BankController {
   @Get('get')
   async getBank() {
     const banks = await this.bankService.getBanks();
+    const users = await this.bankService.getUsers();
     return {
       message: 'Fetched banks',
-      payload: banks,
+      payload: { banks, users },
       success: true,
     };
   }

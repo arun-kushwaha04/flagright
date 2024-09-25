@@ -349,7 +349,7 @@ export class TransactionService {
 
     // Status Filter
     if (query.statusFilter.toFilter && query.statusFilter.value) {
-      filters.status = query.statusFilter.value;
+      filters.state = query.statusFilter.value;
     }
 
     // Type Filter
@@ -381,6 +381,14 @@ export class TransactionService {
         where: transactionFilter,
       });
 
+      if (totalItem == 0)
+        return {
+          pageNumber: 0,
+          itemPerPage,
+          totalPage: 0,
+          transactions: [],
+        };
+
       const totalPage = Math.ceil(totalItem / itemPerPage);
       let transactions: Array<Transaction>;
       if (pageNumber === 0) {
@@ -400,6 +408,13 @@ export class TransactionService {
             createdAt: 'desc',
           },
         });
+        if (firstResult.length == 0)
+          return {
+            pageNumber: 0,
+            itemPerPage,
+            totalPage: 0,
+            transactions: [],
+          };
         const cursorId = firstResult[firstResult.length - 1].id;
         transactions = await this.prisma.transaction.findMany({
           take: itemPerPage,

@@ -24,8 +24,8 @@ export class AuthController {
     @Body(new ZodPipe(userCredSchema)) body: IUserCredentials,
     @Res() res: Response,
   ) {
-    const token = await this.authService.signIn(body);
-    res.cookie('token', token, {
+    const userInfo = await this.authService.signIn(body);
+    res.cookie('token', userInfo.token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
@@ -33,7 +33,7 @@ export class AuthController {
 
     return res.status(HttpStatus.OK).json({
       message: 'Signed in successfully',
-      payload: null,
+      payload: { ...userInfo.userInfo, userId: userInfo.userId },
       success: true,
     });
   }

@@ -92,13 +92,18 @@ export class AuthService {
     return user.id;
   }
 
-  async signIn(data: IUserCredentials): Promise<string> {
+  async signIn(data: IUserCredentials): Promise<{
+    token: string;
+    userInfo: { isAdmin: boolean };
+    userId: number;
+  }> {
     try {
       // validating the user with the provided credentials
       const userId = await this.validateUser(data.email, data.password);
       // generating taken
       const token = await this.jwtService.signAsync({ userId });
-      return token;
+      const userInfo = await this.userExists(userId);
+      return { token, userInfo, userId };
     } catch (error) {
       console.error('Login error: ', error);
       throw handleError(error);

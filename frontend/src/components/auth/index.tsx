@@ -38,7 +38,9 @@ function Login(props: { udpateAuthStatus: (value: boolean) => void }) {
     console.log(data);
     if (data.success) {
       props.udpateAuthStatus(true);
-      setAuthStatus();
+      console.log(data);
+      if (data.payload.isAdmin) setAuthStatus(data.payload.userId, true);
+      else setAuthStatus(data.payload.userId, false);
     } else props.udpateAuthStatus(false);
   };
 

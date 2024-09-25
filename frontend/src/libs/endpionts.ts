@@ -10,3 +10,5 @@ export const loginRoute = '/auth/signIn';
 export const registerRoute = '/auth/signUp';
 export const banksInfo = '/bank/getBanks';
 export const usersTransaction = '/transaction';
+export const bankList = '/bank/get';
+export const toogleCornRoute = '/transaction/toggleCorn';
