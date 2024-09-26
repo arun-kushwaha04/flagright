@@ -1,85 +1,101 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Flagright Transaction API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project implements a backend API for managing concurrent transactions, along with a frontend dashboard for visualizing transaction data. The API is built with Docker Compose for easy deployment of both the frontend and backend services. Additionally, Postman JSON is provided for testing backend APIs that are not available via the frontend interface.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Project Overview
 
-## Description
+The project is designed to handle various transaction operations including:
+- User authentication using cookies.
+- User registration and bank account management.
+- Fetching user balances.
+- Creating transactions.
+- Retrieving transaction details by transaction ID.
+- Searching for transactions based on specific filters.
+- Generating reports and summaries of transactions.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Additional features include:
+- A **CRON job** that generates transactions every second, controllable via the dashboard.
+- Pagination and filtering options for transactions.
+- **Concurrency handling** using `BullMQ` to process transaction tasks asynchronously with high efficiency.
+- **PostgreSQL** database using **Prisma** ORM for data modeling and query execution.
+- **Database isolation level serialization** to ensure transaction safety and data consistency.
+- Dockerized setup for seamless deployment.
 
-## Project setup
+## Key Feature: Concurrency Handling and Transaction Safety
+
+One of the most important aspects of the project is the handling of concurrent transactions with **BullMQ** and **PostgreSQL**.
+
+- **BullMQ**: A job queue that manages concurrent transaction tasks, ensuring that multiple transactions are processed without conflicts or data loss.
+- **Serialization Isolation Level**: The project uses the highest isolation level—**Serializable**—in PostgreSQL to ensure that concurrent transactions do not interfere with each other. This isolation level ensures that transactions are executed as if they are running sequentially, eliminating issues such as dirty reads, non-repeatable reads, and phantom reads.
+
+By combining `BullMQ` with the **serialization isolation level**, the system ensures that even under high concurrency, transactions are processed safely and reliably without sacrificing performance.
+
+## Project Structure
+
+- **Frontend**: The frontend is a React-based dashboard that displays transaction data with filtering and sorting options.
+- **Backend**: The backend is a Node.js API that handles transaction operations, including concurrency handling via `BullMQ`.
+- **Database**: PostgreSQL is used as the database, with Prisma ORM handling database queries and migrations.
+- **Docker**: Docker Compose is used to manage both the frontend and backend services.
+
+## Features
+
+1. **User Authentication and Bank Management**
+   - User registration and login with cookie-based authentication.
+   - Bank creation for users.
+   - Fetching user balances.
+
+2. **Transaction API**
+   - Create, and retrive for transactions.
+   - Filter by user ID, description, date range, amount range, transaction type, transaction state and currency.
+   - Sorting by timestamp.
+   - Pagination for large datasets.
+
+3. **CRON Job for Automatic Transaction Creation**
+   - Generates transactions every second.
+   - Controllable via the frontend dashboard (start/stop).
+
+4. **Concurrency Handling**
+   - Utilizes BullMQ for asynchronous transaction handling.
+   - Ensures safety of concurrent transactions using PostgreSQL’s Serializable isolation level.
+
+5. **Database Seeding**
+   - A seeding script is included to populate the PostgreSQL database with dummy transaction data.
+
+6. **Frontend Dashboard**
+   - Filter and visualize transaction data.
+   - User-friendly interface with options for filtering by amount, date, user ID, and description.
+
+7. **Postman Collection**
+   - The Postman JSON is included for testing backend APIs that are not available from the frontend. Import this into Postman to test the API.
+
+## Prerequisites
+
+- Docker
+- Docker Compose
+
+## Installation and Setup
+
+### 1. Clone the Repository
 
 ```bash
-$ yarn install
+git clone https://github.com/arun-kushwaha04/flagright.git
+cd flagright
 ```
 
-## Compile and run the project
+### 2. Setup evnironment variables
+Implement sample `.env.sample` as `.env` and `.env.development.local.sample` as `.env.development.local`
+
+### 3. Start docker compose
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+docker-compose up -d --build
 ```
 
-## Run tests
+### 4. Access application
+Naviate to `http://localhost:3000` to access frontend, backend is running at `http://localhost:5000`
 
-```bash
-# unit tests
-$ yarn run test
+### 5. Postman collection import
+Import postman collection present in `./resources`
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## ER diagram
+![Database Schema](https://github.com/arun-kushwaha04/flagright/blob/main/resources/Schema%20ER%20diagram.svg)
