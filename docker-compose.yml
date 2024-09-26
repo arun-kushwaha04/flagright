@@ -1,16 +1,38 @@
 services:
+  db:
+    image: postgres
+    container_name: postgresdb
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: testpassword
+      POSTGRES_DB: development
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flagright_network
+
   flagright-backend:
     build:
       context: .
       dockerfile: backend.dockerfile
     container_name: flagright-backend
     depends_on:
-      - redis
-    image: flagright-backend:latest
+      db:
+        condition: service_healthy
     ports:
       - 5000:5000
+      - 5555:5555
     networks:
       - flagright_network
+
   redis:
     image: redis:latest
     container_name: redis
@@ -20,6 +42,7 @@ services:
       - redis_data:/data
     networks:
       - flagright_network
+
   flagright-frontend:
     build:
       context: ./frontend
@@ -27,7 +50,6 @@ services:
     container_name: flagright-frontend
     depends_on:
       - flagright-backend
-    image: flagright-frontend:latest
     ports:
       - 3000:3000
     networks:
@@ -39,3 +61,4 @@ networks:
 
 volumes:
   redis_data:
+  pgdata:

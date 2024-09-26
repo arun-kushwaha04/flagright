@@ -8,10 +8,11 @@ RUN yarn
 
 COPY . .
 
-RUN yarn prisma:migrate:seed:dev
+# RUN yarn prisma:migrate:seed:dev
+RUN yarn prisma:gen:dev
 
 RUN yarn build
 
-EXPOSE 5000
+EXPOSE 5000 5555
 
 CMD ["yarn", "start"]
