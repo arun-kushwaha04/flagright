@@ -8,7 +8,7 @@ RUN yarn
 
 COPY . .
 
-RUN yarn prisma:dev
+RUN yarn prisma:migrate:seed:dev
 
 RUN yarn build
 

@@ -25,7 +25,7 @@
     "prisma:prod": "yarn prisma:gen:prod && yarn prisma:push:prod",
     "prisma:migrate:dev": "dotenv -e .env.development.local -- prisma migrate dev",
     "prisma:seed:dev": "dotenv -e .env.development.local -- yarn seed:db",
-    "prisma:migrate:seed:dev": "yarn prisma:migrate:dev && yarn prisma:seed:dev",
+    "prisma:migrate:seed:dev": "yarn prisma:dev && yarn prisma:migrate:dev && yarn prisma:seed:dev",
     "prisma:gen:dev": "dotenv -e .env.development.local -- prisma generate",
     "prisma:push:dev": "dotenv -e .env.development.local -- prisma db push",
     "prisma:dev": "yarn prisma:gen:dev && yarn prisma:push:dev",
